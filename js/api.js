@@ -1,111 +1,88 @@
-// === KONFIGURACJA ===
+const API_BASE = "http://localhost:3000/api"; // zmień URL jeśli backend będzie na Render lub innym hostingu
 
-// TU PODMIENISZ NA URL Z RENDERA
-const API_URL = "https://underradio-backend.onrender.com/api";
-
-// === TOKEN ===
-function getToken() {
-    return localStorage.getItem("token");
+// --- UTILS ---
+function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-function setToken(token) {
-    localStorage.setItem("token", token);
+// --- REJESTRACJA ---
+export async function registerUser(username, password) {
+    const res = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+    return res.json();
 }
 
-function removeToken() {
-    localStorage.removeItem("token");
-}
-
-// === GŁÓWNA FUNKCJA API ===
-async function apiRequest(endpoint, options = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-    };
-
-    const token = getToken();
-    if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+// --- LOGOWANIE ---
+export async function loginUser(username, password) {
+    const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
     }
-
-    const config = {
-        ...options,
-        headers
-    };
-
-    try {
-        const response = await fetch(API_URL + endpoint, config);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Błąd API");
-        }
-
-        // 204 No Content
-        if (response.status === 204) {
-            return null;
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("API ERROR:", error.message);
-        throw error;
-    }
+    return data;
 }
 
-// === ENDPOINTY (czytelne wrappery) ===
+// --- POBIERANIE WSZYSTKICH TRACKÓW ---
+export async function getAllTracks() {
+    const res = await fetch(`${API_BASE}/tracks`);
+    return res.json();
+}
 
-// AUTH
-async function loginUser(email, password) {
-    return apiRequest("/auth/login", {
+// --- DODAWANIE TRACKA ---
+export async function uploadTrack({ title, description, social, audio, start, end }) {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description || "");
+    formData.append("start", start || 0);
+    formData.append("end", end || 30);
+    formData.append("audio", audio);
+
+    const res = await fetch(`${API_BASE}/tracks`, {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        headers: getAuthHeaders(),
+        body: formData
     });
+    return res.json();
 }
 
-async function registerUser(username, email, password) {
-    return apiRequest("/auth/register", {
+// --- LAJKOWANIE ---
+export async function likeTrack(trackId) {
+    const res = await fetch(`${API_BASE}/tracks/${trackId}/like`, {
         method: "POST",
-        body: JSON.stringify({ username, email, password })
+        headers: getAuthHeaders()
     });
+    return res.json();
 }
 
-async function getMe() {
-    return apiRequest("/auth/me");
+// --- KOMENTARZE ---
+export async function getComments(trackId) {
+    const res = await fetch(`${API_BASE}/tracks/${trackId}/comments`);
+    return res.json();
 }
 
-// TRACKI
-async function getAllTracks() {
-    return apiRequest("/tracks");
-}
-
-async function deleteTrack(trackId) {
-    return apiRequest(`/tracks/${trackId}`, {
-        method: "DELETE"
-    });
-}
-
-// LAJKI
-async function likeTrack(trackId) {
-    return apiRequest(`/tracks/${trackId}/like`, {
-        method: "POST"
-    });
-}
-
-async function unlikeTrack(trackId) {
-    return apiRequest(`/tracks/${trackId}/like`, {
-        method: "DELETE"
-    });
-}
-
-// KOMENTARZE
-async function getComments(trackId) {
-    return apiRequest(`/tracks/${trackId}/comments`);
-}
-
-async function addComment(trackId, content) {
-    return apiRequest(`/tracks/${trackId}/comments`, {
+export async function addComment(trackId, content) {
+    const res = await fetch(`${API_BASE}/tracks/${trackId}/comments`, {
         method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            ...getAuthHeaders()
+        },
         body: JSON.stringify({ content })
     });
+    return res.json();
+}
+
+// --- TOP TYGODNIA ---
+export async function getTopTracks() {
+    const res = await fetch(`${API_BASE}/tracks/top`);
+    return res.json();
 }
