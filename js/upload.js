@@ -1,56 +1,47 @@
-const uploadForm = document.getElementById("upload-form");
+import { uploadTrack } from "./api.js";
 
-uploadForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+function setupUploadForm() {
+    const form = document.getElementById("upload-form");
+    if (!form) return;
 
-    const title = document.getElementById("title").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const social = document.getElementById("social").value.trim();
-    const audioFile = document.getElementById("audio").files[0];
-    const start = parseInt(document.getElementById("start").value, 10);
-    const end = parseInt(document.getElementById("end").value, 10);
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    if (!audioFile) {
-        alert("Wybierz plik audio!");
-        return;
-    }
+        const title = document.getElementById("title").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const social = document.getElementById("social").value.trim();
+        const audio = document.getElementById("audio").files[0];
+        const start = parseInt(document.getElementById("start").value) || 0;
+        const end = parseInt(document.getElementById("end").value) || 30;
 
-    if (end <= start || end - start > 30 || end - start < 15) {
-        alert("Fragment musi mieć od 15 do 30 sekund.");
-        return;
-    }
-
-    if (!localStorage.getItem("token")) {
-        alert("Musisz być zalogowany, żeby dodać utwór.");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("social", social);
-    formData.append("audio", audioFile);
-    formData.append("start", start);
-    formData.append("end", end);
-
-    try {
-        const response = await fetch("https://underradio-backend.onrender.com/api/tracks", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Błąd dodawania utworu.");
+        if (!title || !audio) {
+            alert("Podaj tytuł i plik audio.");
+            return;
         }
 
-        alert("Utwór dodany pomyślnie!");
-        window.location.href = "index.html";
-    } catch (error) {
-        console.error("Upload error:", error);
-        alert("Błąd dodawania utworu: " + error.message);
-    }
+        try {
+            const res = await uploadTrack({ title, description, social, audio, start, end });
+            if (res.error) {
+                alert("Błąd: " + res.error);
+                return;
+            }
+            alert("Utwór dodany pomyślnie!");
+            form.reset();
+
+            // Odśwież listę tracków
+            const event = new Event("loadTracks");
+            document.dispatchEvent(event);
+        } catch (err) {
+            console.error(err);
+            alert("Błąd wysyłania utworu.");
+        }
+    });
+}
+
+// Wywołanie przy ładowaniu strony
+document.addEventListener("DOMContentLoaded", setupUploadForm);
+
+// Odświeżenie tracków po dodaniu nowego
+document.addEventListener("loadTracks", () => {
+    if (window.loadTracks) window.loadTracks();
 });
