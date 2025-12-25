@@ -1,22 +1,16 @@
 const API_BASE = "https://underradio-backend.onrender.com/api";
 
-// --- UTILS ---
-function getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-// --- REJESTRACJA ---
 export async function registerUser(username, password) {
     const res = await fetch(`${API_BASE}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
     });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Błąd rejestracji");
+    return data;
 }
 
-// --- LOGOWANIE ---
 export async function loginUser(username, password) {
     const res = await fetch(`${API_BASE}/login`, {
         method: "POST",
@@ -24,65 +18,36 @@ export async function loginUser(username, password) {
         body: JSON.stringify({ username, password })
     });
     const data = await res.json();
-    if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-    }
+    if (!res.ok) throw new Error(data.error || "Błąd logowania");
     return data;
 }
 
-// --- POBIERANIE WSZYSTKICH TRACKÓW ---
-export async function getAllTracks() {
-    const res = await fetch(`${API_BASE}/tracks`);
-    return res.json();
-}
-
-// --- DODAWANIE TRACKA ---
 export async function uploadTrack({ title, description, social, audio, start, end }) {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Nie jesteś zalogowany");
+
     const formData = new FormData();
     formData.append("title", title);
-    formData.append("description", description || "");
-    formData.append("start", start || 0);
-    formData.append("end", end || 30);
+    formData.append("description", description);
+    formData.append("social", social);
     formData.append("audio", audio);
+    formData.append("start", start);
+    formData.append("end", end);
 
     const res = await fetch(`${API_BASE}/tracks`, {
         method: "POST",
-        headers: getAuthHeaders(),
+        headers: { "Authorization": `Bearer ${token}` },
         body: formData
     });
-    return res.json();
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Błąd uploadu");
+    return data;
 }
 
-// --- LAJKOWANIE ---
-export async function likeTrack(trackId) {
-    const res = await fetch(`${API_BASE}/tracks/${trackId}/like`, {
-        method: "POST",
-        headers: getAuthHeaders()
-    });
-    return res.json();
-}
-
-// --- KOMENTARZE ---
-export async function getComments(trackId) {
-    const res = await fetch(`${API_BASE}/tracks/${trackId}/comments`);
-    return res.json();
-}
-
-export async function addComment(trackId, content) {
-    const res = await fetch(`${API_BASE}/tracks/${trackId}/comments`, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            ...getAuthHeaders()
-        },
-        body: JSON.stringify({ content })
-    });
-    return res.json();
-}
-
-// --- TOP TYGODNIA ---
-export async function getTopTracks() {
-    const res = await fetch(`${API_BASE}/tracks/top`);
-    return res.json();
+export async function getAllTracks() {
+    const res = await fetch(`${API_BASE}/tracks`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Błąd pobierania tracków");
+    return data;
 }
