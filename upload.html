@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderRadio - Dodaj Track</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="header">
+    <h1>UnderRadio</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="top.html">Top Tygodnia</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h2>Dodaj swój utwór</h2>
+    <form id="upload-form">
+        <input type="text" id="title" placeholder="Tytuł utworu" required />
+        <textarea id="description" placeholder="Opis utworu"></textarea>
+        <input type="url" id="social" placeholder="Link do sociali (opcjonalnie)" />
+        <input type="file" id="audio" accept="audio/*" required />
+        <label>
+            Start fragmentu (sekundy):
+            <input type="number" id="start" min="0" value="0" required />
+        </label>
+        <label>
+            Koniec fragmentu (sekundy):
+            <input type="number" id="end" min="1" value="30" required />
+        </label>
+        <button type="submit">Dodaj utwór</button>
+    </form>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/upload.js"></script>
+</body>
+</html>
