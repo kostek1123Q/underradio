@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3000/api"; // zmień URL jeśli backend będzie na Render lub innym hostingu
+const API_BASE = "https://underradio-backend.onrender.com/api";
 
 // --- UTILS ---
 function getAuthHeaders() {
