@@ -1,14 +1,24 @@
+// Importujemy funkcje z api.js
+import { registerUser, loginUser } from "./api.js";
+
+// --- UTILS ---
+function setToken(token) {
+    localStorage.setItem("token", token);
+}
+
 // === LOGOWANIE ===
 const loginForm = document.getElementById("login-form");
 if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
+        const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
 
         try {
-            const data = await loginUser(email, password);
+            const data = await loginUser(username, password);
+            if (data.error) throw new Error(data.error);
+
             setToken(data.token);
             alert("Zalogowano pomyślnie!");
             window.location.href = "index.html";
@@ -25,11 +35,12 @@ if (registerForm) {
         e.preventDefault();
 
         const username = document.getElementById("username").value.trim();
-        const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
         try {
-            const data = await registerUser(username, email, password);
+            const data = await registerUser(username, password);
+            if (data.error) throw new Error(data.error);
+
             setToken(data.token);
             alert("Rejestracja zakończona sukcesem!");
             window.location.href = "index.html";
