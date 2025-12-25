@@ -1,6 +1,5 @@
 import { uploadTrack } from "./api.js";
 
-// Formularz dodawania utworu
 function setupUploadForm() {
     const form = document.getElementById("upload-form");
     if (!form) return;
@@ -25,7 +24,6 @@ function setupUploadForm() {
             alert("Utwór dodany pomyślnie!");
             form.reset();
 
-            // Odśwież listę tracków po dodaniu nowego utworu
             if (window.loadTracks) window.loadTracks();
         } catch (err) {
             console.error(err);
