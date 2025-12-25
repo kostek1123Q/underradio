@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
 export async function loadTracks() {
     const container = document.getElementById("tracks-list");
     container.innerHTML = "<p>Ładowanie tracków...</p>";
+    
+    console.log(tracks);
 
     try {
         const tracks = await getAllTracks();
