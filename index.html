@@ -10,18 +10,42 @@
 
 <header class="header">
     <h1>UnderRadio</h1>
-    <nav>
+    <nav id="nav-links">
         <a href="index.html">Home</a>
         <a href="top.html">Top Tygodnia</a>
-        <a href="login.html">Logowanie</a>
-        <a href="register.html">Rejestracja</a>
+        <a href="login.html" id="login-link">Logowanie</a>
+        <a href="register.html" id="register-link">Rejestracja</a>
+        <!-- Profil i Dodaj utwór wstawiane dynamicznie po zalogowaniu -->
     </nav>
 </header>
 
 <main class="container">
+
+    <!-- Sekcja dodawania utworu -->
+    <section id="upload-section" style="display:none;">
+        <h2>Dodaj swój utwór</h2>
+        <form id="upload-form">
+            <input type="text" id="title" placeholder="Tytuł utworu" required />
+            <textarea id="description" placeholder="Opis utworu"></textarea>
+            <input type="url" id="social" placeholder="Link do sociali (opcjonalnie)" />
+            <input type="file" id="audio" accept="audio/*" required />
+            <label>
+                Start fragmentu (sekundy):
+                <input type="number" id="start" min="0" value="0" required />
+            </label>
+            <label>
+                Koniec fragmentu (sekundy):
+                <input type="number" id="end" min="1" value="30" required />
+            </label>
+            <button type="submit">Dodaj utwór</button>
+        </form>
+    </section>
+
+    <!-- Lista tracków -->
     <section id="tracks-list">
         <!-- Tracki będą ładowane dynamicznie -->
     </section>
+
 </main>
 
 <footer class="footer">
@@ -31,7 +55,7 @@
 <script src="js/api.js"></script>
 <script src="js/player.js"></script>
 <script src="js/likes.js"></script>
+<script src="js/upload.js"></script>
 <script src="js/main.js"></script>
-
 </body>
 </html>
