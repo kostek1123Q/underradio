@@ -1,44 +1,36 @@
-const globalPlayer = document.getElementById("global-player");
-const playerAudio = document.getElementById("player-audio");
-const playerTitle = document.getElementById("player-title");
-const playerToggle = document.getElementById("player-toggle");
+let currentAudio = null;
+let currentButton = null;
 
-let currentTrackId = null;
+export function togglePlay(trackElement) {
+    const audio = trackElement.querySelector("audio");
+    const button = trackElement.querySelector('[data-action="play"]');
 
-function playTrackGlobal(track) {
-    if (currentTrackId === track.id) {
-        // Przełącz play/pause tego samego utworu
-        if (playerAudio.paused) {
-            playerAudio.play();
-            playerToggle.textContent = "Pause";
+    if (currentAudio === audio) {
+        if (audio.paused) {
+            audio.play();
+            button.textContent = "Pause";
         } else {
-            playerAudio.pause();
-            playerToggle.textContent = "Play";
+            audio.pause();
+            button.textContent = "Play";
         }
         return;
     }
 
-    // Nowy utwór
-    playerAudio.src = track.audio_url;
-    playerTitle.textContent = `${track.title} - @${track.user.username}`;
-    playerAudio.currentTime = track.start || 0;
-    playerAudio.play();
-    playerToggle.textContent = "Pause";
-    globalPlayer.style.display = "flex";
-    currentTrackId = track.id;
-}
-
-playerToggle.addEventListener("click", () => {
-    if (!playerAudio.src) return;
-    if (playerAudio.paused) {
-        playerAudio.play();
-        playerToggle.textContent = "Pause";
-    } else {
-        playerAudio.pause();
-        playerToggle.textContent = "Play";
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        if (currentButton) currentButton.textContent = "Play";
     }
-});
 
-playerAudio.addEventListener("ended", () => {
-    playerToggle.textContent = "Play";
-});
+    currentAudio = audio;
+    currentButton = button;
+
+    audio.play();
+    button.textContent = "Pause";
+
+    audio.onended = () => {
+        button.textContent = "Play";
+        currentAudio = null;
+        currentButton = null;
+    };
+}
