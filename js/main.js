@@ -1,6 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
+    updateHeader();
     loadTracks();
+    setupUploadForm();
 });
+
+function updateHeader() {
+    const token = localStorage.getItem("token");
+    const nav = document.getElementById("nav-links");
+    const loginLink = document.getElementById("login-link");
+    const registerLink = document.getElementById("register-link");
+
+    if (token) {
+        loginLink.style.display = "none";
+        registerLink.style.display = "none";
+
+        if (!document.getElementById("profile-link")) {
+            const profileLink = document.createElement("a");
+            profileLink.href = "profile.html";
+            profileLink.id = "profile-link";
+            profileLink.textContent = "Profil";
+            nav.appendChild(profileLink);
+        }
+
+        if (!document.getElementById("upload-link")) {
+            const uploadLink = document.createElement("a");
+            uploadLink.href = "#upload-section";
+            uploadLink.id = "upload-link";
+            uploadLink.textContent = "Dodaj utwór";
+            nav.appendChild(uploadLink);
+        }
+
+        document.getElementById("upload-section").style.display = "block";
+    } else {
+        loginLink.style.display = "inline";
+        registerLink.style.display = "inline";
+        document.getElementById("upload-section").style.display = "none";
+    }
+}
 
 async function loadTracks() {
     const container = document.getElementById("tracks-list");
@@ -16,8 +52,8 @@ async function loadTracks() {
         }
 
         tracks.forEach(track => {
-            const trackElement = createTrackElement(track);
-            container.appendChild(trackElement);
+            const trackEl = createTrackElement(track);
+            container.appendChild(trackEl);
         });
     } catch (error) {
         console.error("Błąd ładowania tracków:", error);
@@ -37,16 +73,7 @@ function createTrackElement(track) {
             </div>
         </div>
 
-        ${track.description ? `
-            <div class="track-description">
-                ${escapeHtml(track.description)}
-            </div>
-        ` : ""}
-
-        <div class="track-player">
-            <button data-action="play">Play</button>
-            <audio src="${track.audio_url}" preload="none"></audio>
-        </div>
+        ${track.description ? `<div class="track-description">${escapeHtml(track.description)}</div>` : ""}
 
         <div class="track-actions">
             <span data-action="like" class="${track.liked ? 'liked' : ''}">❤️ ${track.likes_count}</span>
@@ -61,22 +88,18 @@ function createTrackElement(track) {
 }
 
 function bindTrackEvents(trackEl, track) {
-    const playBtn = trackEl.querySelector('[data-action="play"]');
     const likeBtn = trackEl.querySelector('[data-action="like"]');
     const commentBtn = trackEl.querySelector('[data-action="comment"]');
     const commentsContainer = trackEl.querySelector(".comments");
+    const titleEl = trackEl.querySelector(".track-title");
 
-    // PLAY / PAUSE
-    playBtn.addEventListener("click", () => {
-        togglePlay(trackEl);
+    // Kliknięcie na tytuł otwiera globalny player
+    titleEl.addEventListener("click", () => {
+        playTrackGlobal(track);
     });
 
-    // LIKE / UNLIKE
-    likeBtn.addEventListener("click", () => {
-        toggleLike(track.id, likeBtn);
-    });
+    likeBtn.addEventListener("click", () => toggleLike(track.id, likeBtn));
 
-    // KOMENTARZE
     commentBtn.addEventListener("click", async () => {
         if (commentsContainer.style.display === "none") {
             await loadComments(track.id, commentsContainer);
@@ -87,19 +110,15 @@ function bindTrackEvents(trackEl, track) {
     });
 }
 
-// === KOMENTARZE ===
 async function loadComments(trackId, container) {
     container.innerHTML = "<p>Ładowanie komentarzy...</p>";
-
     try {
         const comments = await getComments(trackId);
         container.innerHTML = "";
-
         if (!comments || comments.length === 0) {
             container.innerHTML = "<p>Brak komentarzy.</p>";
             return;
         }
-
         comments.forEach(c => {
             const div = document.createElement("div");
             div.className = "comment";
@@ -112,7 +131,6 @@ async function loadComments(trackId, container) {
     }
 }
 
-// === UTILS ===
 function escapeHtml(text) {
     if (!text) return "";
     const div = document.createElement("div");
