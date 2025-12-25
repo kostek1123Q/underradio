@@ -1,44 +1,14 @@
+import { getAllTracks, getComments, likeTrack } from "./api.js";
+import { togglePlay } from "./player.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-    updateHeader();
     loadTracks();
-    setupUploadForm();
 });
 
-function updateHeader() {
-    const token = localStorage.getItem("token");
-    const nav = document.getElementById("nav-links");
-    const loginLink = document.getElementById("login-link");
-    const registerLink = document.getElementById("register-link");
+// Ustawienie globalnie, żeby upload.js mógł wywołać odświeżenie
+window.loadTracks = loadTracks;
 
-    if (token) {
-        loginLink.style.display = "none";
-        registerLink.style.display = "none";
-
-        if (!document.getElementById("profile-link")) {
-            const profileLink = document.createElement("a");
-            profileLink.href = "profile.html";
-            profileLink.id = "profile-link";
-            profileLink.textContent = "Profil";
-            nav.appendChild(profileLink);
-        }
-
-        if (!document.getElementById("upload-link")) {
-            const uploadLink = document.createElement("a");
-            uploadLink.href = "#upload-section";
-            uploadLink.id = "upload-link";
-            uploadLink.textContent = "Dodaj utwór";
-            nav.appendChild(uploadLink);
-        }
-
-        document.getElementById("upload-section").style.display = "block";
-    } else {
-        loginLink.style.display = "inline";
-        registerLink.style.display = "inline";
-        document.getElementById("upload-section").style.display = "none";
-    }
-}
-
-async function loadTracks() {
+export async function loadTracks() {
     const container = document.getElementById("tracks-list");
     container.innerHTML = "<p>Ładowanie tracków...</p>";
 
@@ -52,8 +22,8 @@ async function loadTracks() {
         }
 
         tracks.forEach(track => {
-            const trackEl = createTrackElement(track);
-            container.appendChild(trackEl);
+            const trackElement = createTrackElement(track);
+            container.appendChild(trackElement);
         });
     } catch (error) {
         console.error("Błąd ładowania tracków:", error);
@@ -75,6 +45,11 @@ function createTrackElement(track) {
 
         ${track.description ? `<div class="track-description">${escapeHtml(track.description)}</div>` : ""}
 
+        <div class="track-player">
+            <button data-action="play">Play</button>
+            <audio src="${track.audio_url}" preload="none"></audio>
+        </div>
+
         <div class="track-actions">
             <span data-action="like" class="${track.liked ? 'liked' : ''}">❤️ ${track.likes_count}</span>
             <span data-action="comment">💬 Komentarze</span>
@@ -88,17 +63,25 @@ function createTrackElement(track) {
 }
 
 function bindTrackEvents(trackEl, track) {
+    const playBtn = trackEl.querySelector('[data-action="play"]');
     const likeBtn = trackEl.querySelector('[data-action="like"]');
     const commentBtn = trackEl.querySelector('[data-action="comment"]');
     const commentsContainer = trackEl.querySelector(".comments");
-    const titleEl = trackEl.querySelector(".track-title");
 
-    // Kliknięcie na tytuł otwiera globalny player
-    titleEl.addEventListener("click", () => {
-        playTrackGlobal(track);
+    playBtn.addEventListener("click", () => {
+        togglePlay(trackEl);
     });
 
-    likeBtn.addEventListener("click", () => toggleLike(track.id, likeBtn));
+    likeBtn.addEventListener("click", async () => {
+        try {
+            await likeTrack(track.id);
+            const count = parseInt(likeBtn.textContent.replace(/\D/g, ""));
+            likeBtn.textContent = `❤️ ${count + 1}`;
+            likeBtn.classList.add("liked");
+        } catch {
+            alert("Musisz być zalogowany, żeby lajkować.");
+        }
+    });
 
     commentBtn.addEventListener("click", async () => {
         if (commentsContainer.style.display === "none") {
@@ -112,13 +95,16 @@ function bindTrackEvents(trackEl, track) {
 
 async function loadComments(trackId, container) {
     container.innerHTML = "<p>Ładowanie komentarzy...</p>";
+
     try {
         const comments = await getComments(trackId);
         container.innerHTML = "";
+
         if (!comments || comments.length === 0) {
             container.innerHTML = "<p>Brak komentarzy.</p>";
             return;
         }
+
         comments.forEach(c => {
             const div = document.createElement("div");
             div.className = "comment";
