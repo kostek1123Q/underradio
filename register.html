@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UnderRadio - Rejestracja</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="header">
+    <h1>UnderRadio</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="login.html">Logowanie</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h2>Rejestracja</h2>
+    <form id="register-form">
+        <input type="text" id="username" placeholder="Nazwa użytkownika" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Hasło" required />
+        <button type="submit">Zarejestruj się</button>
+    </form>
+    <p>Masz już konto? <a href="login.html">Zaloguj się</a></p>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
