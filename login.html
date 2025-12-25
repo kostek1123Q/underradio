@@ -18,14 +18,14 @@
 <main class="container">
     <h2>Logowanie</h2>
     <form id="login-form">
-        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="username" placeholder="Nazwa użytkownika" required />
         <input type="password" id="password" placeholder="Hasło" required />
         <button type="submit">Zaloguj się</button>
     </form>
     <p>Nie masz konta? <a href="register.html">Zarejestruj się</a></p>
 </main>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
+<!-- type="module" jest wymagany dla importów ES6 -->
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>
