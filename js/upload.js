@@ -1,5 +1,6 @@
 import { uploadTrack } from "./api.js";
 
+// Formularz dodawania utworu
 function setupUploadForm() {
     const form = document.getElementById("upload-form");
     if (!form) return;
@@ -20,17 +21,12 @@ function setupUploadForm() {
         }
 
         try {
-            const res = await uploadTrack({ title, description, social, audio, start, end });
-            if (res.error) {
-                alert("Błąd: " + res.error);
-                return;
-            }
+            await uploadTrack({ title, description, social, audio, start, end });
             alert("Utwór dodany pomyślnie!");
             form.reset();
 
-            // Odśwież listę tracków
-            const event = new Event("loadTracks");
-            document.dispatchEvent(event);
+            // Odśwież listę tracków po dodaniu nowego utworu
+            if (window.loadTracks) window.loadTracks();
         } catch (err) {
             console.error(err);
             alert("Błąd wysyłania utworu.");
@@ -38,10 +34,4 @@ function setupUploadForm() {
     });
 }
 
-// Wywołanie przy ładowaniu strony
 document.addEventListener("DOMContentLoaded", setupUploadForm);
-
-// Odświeżenie tracków po dodaniu nowego
-document.addEventListener("loadTracks", () => {
-    if (window.loadTracks) window.loadTracks();
-});
