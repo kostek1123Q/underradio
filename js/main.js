@@ -10,7 +10,7 @@ async function loadTracks() {
         const tracks = await getAllTracks();
         container.innerHTML = "";
 
-        if (!tracks.length) {
+        if (!tracks || tracks.length === 0) {
             container.innerHTML = "<p>Brak tracków.</p>";
             return;
         }
@@ -20,6 +20,7 @@ async function loadTracks() {
             container.appendChild(trackElement);
         });
     } catch (error) {
+        console.error("Błąd ładowania tracków:", error);
         container.innerHTML = "<p>Błąd ładowania tracków.</p>";
     }
 }
@@ -48,7 +49,7 @@ function createTrackElement(track) {
         </div>
 
         <div class="track-actions">
-            <span data-action="like">❤️ ${track.likes_count}</span>
+            <span data-action="like" class="${track.liked ? 'liked' : ''}">❤️ ${track.likes_count}</span>
             <span data-action="comment">💬 Komentarze</span>
         </div>
 
@@ -65,20 +66,17 @@ function bindTrackEvents(trackEl, track) {
     const commentBtn = trackEl.querySelector('[data-action="comment"]');
     const commentsContainer = trackEl.querySelector(".comments");
 
+    // PLAY / PAUSE
     playBtn.addEventListener("click", () => {
         togglePlay(trackEl);
     });
 
-    likeBtn.addEventListener("click", async () => {
-        try {
-            await likeTrack(track.id);
-            const count = parseInt(likeBtn.textContent.replace(/\D/g, ""));
-            likeBtn.textContent = `❤️ ${count + 1}`;
-        } catch (e) {
-            alert("Musisz być zalogowany, żeby lajkować.");
-        }
+    // LIKE / UNLIKE
+    likeBtn.addEventListener("click", () => {
+        toggleLike(track.id, likeBtn);
     });
 
+    // KOMENTARZE
     commentBtn.addEventListener("click", async () => {
         if (commentsContainer.style.display === "none") {
             await loadComments(track.id, commentsContainer);
@@ -97,19 +95,26 @@ async function loadComments(trackId, container) {
         const comments = await getComments(trackId);
         container.innerHTML = "";
 
+        if (!comments || comments.length === 0) {
+            container.innerHTML = "<p>Brak komentarzy.</p>";
+            return;
+        }
+
         comments.forEach(c => {
             const div = document.createElement("div");
             div.className = "comment";
             div.textContent = `@${c.user.username}: ${c.content}`;
             container.appendChild(div);
         });
-    } catch {
+    } catch (error) {
+        console.error("Błąd ładowania komentarzy:", error);
         container.innerHTML = "<p>Błąd komentarzy.</p>";
     }
 }
 
 // === UTILS ===
 function escapeHtml(text) {
+    if (!text) return "";
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
