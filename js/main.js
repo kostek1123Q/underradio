@@ -1,13 +1,14 @@
 import { getAllTracks, getComments, likeTrack } from "./api.js";
 import { togglePlay } from "./player.js";
 
+// Po załadowaniu DOM
 document.addEventListener("DOMContentLoaded", () => {
     loadTracks();
 });
 
-// Ustawienie globalnie, żeby upload.js mógł wywołać odświeżenie
-window.loadTracks = loadTracks;
+// === FUNKCJE ===
 
+// Load all tracks
 export async function loadTracks() {
     const container = document.getElementById("tracks-list");
     container.innerHTML = "<p>Ładowanie tracków...</p>";
@@ -31,15 +32,18 @@ export async function loadTracks() {
     }
 }
 
+// Create HTML for single track
 function createTrackElement(track) {
     const div = document.createElement("div");
     div.className = "track";
+
+    const username = track.user?.username || "Anonim";
 
     div.innerHTML = `
         <div class="track-header">
             <div>
                 <div class="track-title">${escapeHtml(track.title)}</div>
-                <div class="track-author">@${escapeHtml(track.user.username)}</div>
+                <div class="track-author">@${escapeHtml(username)}</div>
             </div>
         </div>
 
@@ -51,7 +55,7 @@ function createTrackElement(track) {
         </div>
 
         <div class="track-actions">
-            <span data-action="like" class="${track.liked ? 'liked' : ''}">❤️ ${track.likes_count}</span>
+            <span data-action="like" class="${track.liked ? 'liked' : ''}">❤️ ${track.likes_count || 0}</span>
             <span data-action="comment">💬 Komentarze</span>
         </div>
 
@@ -62,27 +66,32 @@ function createTrackElement(track) {
     return div;
 }
 
+// Bind event listeners
 function bindTrackEvents(trackEl, track) {
     const playBtn = trackEl.querySelector('[data-action="play"]');
     const likeBtn = trackEl.querySelector('[data-action="like"]');
     const commentBtn = trackEl.querySelector('[data-action="comment"]');
     const commentsContainer = trackEl.querySelector(".comments");
 
+    // Play / Pause
     playBtn.addEventListener("click", () => {
         togglePlay(trackEl);
     });
 
+    // Like / Unlike
     likeBtn.addEventListener("click", async () => {
         try {
             await likeTrack(track.id);
-            const count = parseInt(likeBtn.textContent.replace(/\D/g, ""));
-            likeBtn.textContent = `❤️ ${count + 1}`;
+            let count = parseInt(likeBtn.textContent.replace(/\D/g, "")) || 0;
+            count += 1;
+            likeBtn.textContent = `❤️ ${count}`;
             likeBtn.classList.add("liked");
         } catch {
             alert("Musisz być zalogowany, żeby lajkować.");
         }
     });
 
+    // Show / Hide comments
     commentBtn.addEventListener("click", async () => {
         if (commentsContainer.style.display === "none") {
             await loadComments(track.id, commentsContainer);
@@ -93,6 +102,7 @@ function bindTrackEvents(trackEl, track) {
     });
 }
 
+// Load comments for a track
 async function loadComments(trackId, container) {
     container.innerHTML = "<p>Ładowanie komentarzy...</p>";
 
@@ -117,9 +127,13 @@ async function loadComments(trackId, container) {
     }
 }
 
+// Escape HTML to prevent XSS
 function escapeHtml(text) {
     if (!text) return "";
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Ustawienie globalnie po definicji, żeby upload.js mógł wywołać odświeżenie
+window.loadTracks = loadTracks;
