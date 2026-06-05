@@ -284,3 +284,45 @@ body, html{
 .comments{
   word-break:break-word;
 }
+
+/* ================= DEVICE MODES ================= */
+
+/* DESKTOP DEFAULT */
+body.desktop .track{
+  max-width:760px;
+}
+
+/* MOBILE MODE */
+body.mobile .track{
+  margin:10px;
+  padding:14px;
+  border-radius:12px;
+}
+
+body.mobile header h1{
+  font-size:1rem;
+}
+
+body.mobile iframe{
+  height:160px;
+}
+
+body.mobile .comments{
+  max-height:90px;
+}
+
+body.mobile .panel{
+  margin:10px;
+  padding:14px;
+}
+
+/* inputs always safe */
+input, .commentBox{
+  width:100%;
+  max-width:100%;
+}
+
+/* prevent horizontal scroll bugs */
+html, body{
+  overflow-x:hidden;
+}
