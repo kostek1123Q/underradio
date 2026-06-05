@@ -123,4 +123,4 @@ async function render(){
 }
 
 loadTracks();
-setInterval(loadTracks, 5000);
+setInterval(loadTracks, 25000);
