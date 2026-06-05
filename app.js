@@ -1,208 +1,123 @@
+const API = "https://YOUR-RENDER-URL"; // <- ZMIEN TO
+
 let tracks = [];
 
-function getEmbed(link){
-
-if(link.includes("youtube.com/watch?v=")){
-
-const id =
-link.split("v=")[1].split("&")[0];
-
-return `
-<iframe
-src="https://www.youtube.com/embed/${id}"
-allowfullscreen>
-</iframe>
-`;
+async function loadTracks(){
+const res = await fetch(`${API}/tracks`);
+tracks = await res.json();
+render();
 }
 
-if(link.includes("youtu.be/")){
+function embed(url){
 
-const id =
-link.split("/").pop();
-
-return `
-<iframe
-src="https://www.youtube.com/embed/${id}"
-allowfullscreen>
-</iframe>
-`;
+if(url.includes("youtube.com/watch")){
+const id = url.split("v=")[1].split("&")[0];
+return `https://www.youtube.com/embed/${id}`;
 }
 
-if(link.includes("spotify.com")){
-
-const clean =
-link.split("?")[0];
-
-return `
-<iframe
-src="${clean.replace(
-'open.spotify.com',
-'open.spotify.com/embed'
-)}">
-</iframe>
-`;
+if(url.includes("youtu.be")){
+const id = url.split("/").pop();
+return `https://www.youtube.com/embed/${id}`;
 }
 
-if(link.includes("soundcloud.com")){
+if(url.includes("spotify")){
+return url.replace("open.spotify.com","open.spotify.com/embed");
+}
 
-return `
-<iframe
-src="https://w.soundcloud.com/player/?url=${encodeURIComponent(link)}">
-</iframe>
-`;
+if(url.includes("soundcloud")){
+return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}`;
 }
 
 return "";
 }
 
-function renderTracks(){
+async function addTrack(){
+
+const nick = document.getElementById("nick").value;
+const url = document.getElementById("url").value;
+
+if(!nick || !url) return alert("uzupełnij pola");
+
+await fetch(`${API}/tracks`,{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+nickname:nick,
+track_url:url
+})
+});
+
+document.getElementById("nick").value="";
+document.getElementById("url").value="";
+
+loadTracks();
+}
+
+async function likeTrack(id){
+await fetch(`${API}/tracks/${id}/like`,{
+method:"POST"
+});
+
+loadTracks();
+}
+
+async function loadComments(id){
+const res = await fetch(`${API}/tracks/${id}/comments`);
+return await res.json();
+}
+
+async function addComment(id){
+
+const input = document.getElementById(`c-${id}`);
+const value = input.value;
+
+if(!value) return;
+
+await fetch(`${API}/tracks/${id}/comments`,{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+nickname:"user",
+comment:value
+})
+});
+
+loadTracks();
+}
+
+function render(){
 
 tracks.sort((a,b)=>b.likes-a.likes);
 
-const list =
-document.getElementById("trackList");
+const box = document.getElementById("tracks");
+box.innerHTML="";
 
-list.innerHTML="";
+tracks.forEach(t=>{
 
-tracks.forEach((track,index)=>{
+box.innerHTML += `
+<div class="track">
 
-const commentsHTML =
-track.comments
-.map(comment =>
-`<div class="comment">${comment}</div>`)
-.join("");
+<div class="top">
+<div class="nick">${t.nickname}</div>
 
-list.innerHTML += `
-
-<div class="track-card">
-
-<div class="track-top">
-
-<div>
-
-<div class="nickname">
-${track.nick}
+<div class="like" onclick="likeTrack(${t.id})">
+🔥 ${t.likes}
+</div>
 </div>
 
-<a
-class="track-link"
-href="${track.link}"
-target="_blank">
+<a href="${t.track_url}" target="_blank">open link</a>
 
-Otwórz link
+${embed(t.track_url) ? `
+<iframe src="${embed(t.track_url)}"></iframe>
+` : ""}
 
-</a>
-
-</div>
-
-<div class="likes">
-
-<span>${track.likes}</span>
-
-<button
-class="like-btn"
-onclick="likeTrack(${index})">
-
-🔥
-
-</button>
+<input class="commentBox" id="c-${t.id}" placeholder="komentarz">
+<button class="smallBtn" onclick="addComment(${t.id})">dodaj</button>
 
 </div>
-
-</div>
-
-<div class="preview">
-${track.embed}
-</div>
-
-<div class="comments">
-
-${commentsHTML}
-
-<input
-class="comment-input"
-id="comment-${index}"
-placeholder="Dodaj komentarz">
-
-<button
-class="comment-btn"
-onclick="addComment(${index})">
-
-Dodaj komentarz
-
-</button>
-
-</div>
-
-</div>
-
 `;
 });
 }
 
-function likeTrack(index){
-
-tracks[index].likes++;
-
-renderTracks();
-}
-
-function addComment(index){
-
-const input =
-document.getElementById(
-`comment-${index}`
-);
-
-const value =
-input.value.trim();
-
-if(!value) return;
-
-tracks[index]
-.comments
-.push(value);
-
-renderTracks();
-}
-
-document
-.getElementById("submitTrack")
-.addEventListener("click",()=>{
-
-const nick =
-document.getElementById("nickname")
-.value
-.trim();
-
-const link =
-document.getElementById("trackLink")
-.value
-.trim();
-
-if(!nick || !link){
-
-alert("Uzupełnij wszystkie pola");
-
-return;
-}
-
-tracks.push({
-
-nick,
-link,
-
-likes:0,
-
-comments:[],
-
-embed:getEmbed(link)
-
-});
-
-document.getElementById("nickname").value="";
-document.getElementById("trackLink").value="";
-
-renderTracks();
-
-});
+loadTracks();
+setInterval(loadTracks, 5000);
