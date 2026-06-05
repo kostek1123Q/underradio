@@ -2,44 +2,7 @@ const API = "https://underradio-backend.onrender.com";
 
 let tracks = [];
 
-/* ---------------- SMART KEEP-ALIVE ---------------- */
-
-let lastPing = 0;
-let failCount = 0;
-
-async function smartKeepAlive() {
-  const now = Date.now();
-
-  // 1 request / 60s max
-  if (now - lastPing < 60000) return;
-
-  // only when tab active
-  if (document.hidden) return;
-
-  lastPing = now;
-
-  try {
-    await fetch(`${API}/test`);
-    failCount = 0;
-    console.log("🟢 keep-alive OK");
-
-  } catch (e) {
-    failCount++;
-    console.log("🔴 keep-alive FAIL:", failCount);
-
-    // backoff (max 5 min)
-    lastPing = Date.now() + Math.min(60000 * failCount, 300000);
-  }
-}
-
-smartKeepAlive();
-setInterval(smartKeepAlive, 15000);
-
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) smartKeepAlive();
-});
-
-/* ---------------- LOAD TRACKS ---------------- */
+/* ---------------- LOAD ---------------- */
 
 async function loadTracks(){
   const res = await fetch(`${API}/tracks`);
@@ -58,8 +21,7 @@ function embed(url){
   }
 
   if(url.includes("youtu.be")){
-    const id = url.split("/").pop();
-    return `https://www.youtube.com/embed/${id}`;
+    return `https://www.youtube.com/embed/${url.split("/").pop()}`;
   }
 
   if(url.includes("spotify")){
@@ -86,15 +48,17 @@ async function loadComments(id){
 async function addTrack(){
   const nick = document.getElementById("nick").value;
   const url = document.getElementById("url").value;
+  const tags = document.getElementById("tags")?.value || "";
 
   await fetch(`${API}/tracks`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ nickname:nick, track_url:url })
+    body: JSON.stringify({
+      nickname:nick,
+      track_url:url,
+      hashtags: tags
+    })
   });
-
-  document.getElementById("nick").value = "";
-  document.getElementById("url").value = "";
 
   loadTracks();
 }
@@ -102,7 +66,7 @@ async function addTrack(){
 /* ---------------- LIKE ---------------- */
 
 async function likeTrack(id){
-  await fetch(`${API}/tracks/${id}/like`, { method:"POST" });
+  await fetch(`${API}/tracks/${id}/like`,{method:"POST"});
   loadTracks();
 }
 
@@ -120,14 +84,13 @@ async function addComment(id){
     })
   });
 
-  input.value = "";
+  input.value="";
   loadTracks();
 }
 
 /* ---------------- RENDER ---------------- */
 
 async function render(){
-
   const box = document.getElementById("tracks");
   box.innerHTML = "";
 
@@ -135,36 +98,56 @@ async function render(){
 
     const comments = await loadComments(t.id);
 
+    const tags = (t.hashtags || "")
+      .split(" ")
+      .filter(Boolean)
+      .map(tag => `<span class="tag" onclick="filterTag('${tag}')">${tag}</span>`)
+      .join("");
+
+    const previewComments = comments.slice(0,3);
+    const more = comments.length > 3;
+
     box.innerHTML += `
       <div class="track">
 
         <div class="top">
           <div class="nick">${t.nickname}</div>
-
-          <div class="like" onclick="likeTrack(${t.id})">
-            💖 ${t.likes}
-          </div>
+          <div class="like" onclick="likeTrack(${t.id})">💖 ${t.likes}</div>
         </div>
 
         <a href="${t.track_url}" target="_blank">OPEN</a>
 
-        ${embed(t.track_url) ? `
-          <iframe src="${embed(t.track_url)}"></iframe>
-        ` : ""}
+        <div>${tags}</div>
+
+        ${embed(t.track_url) ? `<iframe src="${embed(t.track_url)}"></iframe>` : ""}
 
         <div class="comments">
-          ${comments.map(c =>
+          ${previewComments.map(c =>
             `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`
           ).join("")}
+
+          ${more ? `<div onclick="toggleComments(${t.id})">+ more</div>` : ""}
         </div>
 
-        <input id="c-${t.id}" class="commentBox" placeholder="comment...">
+        <input id="c-${t.id}" class="commentBox">
         <button class="smallBtn" onclick="addComment(${t.id})">send</button>
 
       </div>
     `;
   }
 }
+
+/* ---------------- FILTER TAG ---------------- */
+
+function filterTag(tag){
+  document.querySelectorAll(".track").forEach(el=>{
+    if(!el.innerText.includes(tag)){
+      el.style.display="none";
+    }
+  });
+}
+
+/* ---------------- INIT ---------------- */
 
 loadTracks();
 setInterval(loadTracks, 25000);
