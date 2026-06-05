@@ -1,36 +1,14 @@
 const API = "https://underradio-backend.onrender.com";
 
 let tracks = [];
-let commentCache = {};
 let activeTag = null;
-let expandedComments = {};
 
 /* ---------------- LOAD ---------------- */
 
 async function loadTracks(){
   const res = await fetch(`${API}/tracks`);
   tracks = await res.json();
-  commentCache = {};
   render();
-}
-
-/* ---------------- TAGS ---------------- */
-
-function parseTags(str=""){
-  return str.split(/[\s,]+/)
-    .map(t => t.trim())
-    .filter(Boolean)
-    .map(t => t.startsWith("#") ? t : "#"+t);
-}
-
-function setTag(tag){
-  activeTag = activeTag === tag ? null : tag;
-  render();
-}
-
-function filterTracks(list){
-  if(!activeTag) return list;
-  return list.filter(t => (t.hashtags || "").includes(activeTag));
 }
 
 /* ---------------- EMBED ---------------- */
@@ -60,21 +38,20 @@ function embed(url){
   return "";
 }
 
-/* ---------------- COMMENTS ---------------- */
+/* ---------------- TAGS ---------------- */
 
-async function loadComments(id){
-  if(commentCache[id]) return commentCache[id];
-
-  const res = await fetch(`${API}/tracks/${id}/comments`);
-  const data = await res.json();
-
-  commentCache[id] = data;
-  return data;
+function parseTags(str=""){
+  return str
+    .split("#")
+    .map(t => t.trim())
+    .filter(Boolean);
 }
 
-function toggleComments(id){
-  expandedComments[id] = !expandedComments[id];
-  render();
+function matchTag(track){
+  if(!activeTag) return true;
+
+  const tags = parseTags(track.hashtags);
+  return tags.includes(activeTag);
 }
 
 /* ---------------- ADD TRACK ---------------- */
@@ -82,12 +59,16 @@ function toggleComments(id){
 async function addTrack(){
   const nick = document.getElementById("nick").value;
   const url = document.getElementById("url").value;
-  const tags = parseTags(document.getElementById("tags").value).join(" ");
+  const tags = document.getElementById("tags").value;
 
   await fetch(`${API}/tracks`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ nickname:nick, track_url:url, hashtags:tags })
+    body: JSON.stringify({
+      nickname:nick,
+      track_url:url,
+      hashtags: tags
+    })
   });
 
   loadTracks();
@@ -97,112 +78,111 @@ async function addTrack(){
 
 async function likeTrack(id){
   await fetch(`${API}/tracks/${id}/like`, { method:"POST" });
-  const t = tracks.find(x => x.id === id);
-  if(t) t.likes++;
-  render();
+  loadTracks();
 }
 
 /* ---------------- DELETE ---------------- */
 
 async function deleteTrack(id){
-  const pass = prompt("Admin password:");
-  if(pass !== "admin") return alert("DENIED");
+  const pass = prompt("ADMIN PASSWORD:");
+
+  if(!pass) return;
 
   await fetch(`${API}/tracks/${id}`,{
     method:"DELETE",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ password:pass })
+    body: JSON.stringify({ password: pass })
   });
 
-  tracks = tracks.filter(t => t.id !== id);
-  render();
+  loadTracks();
 }
 
 /* ---------------- COMMENTS ---------------- */
 
+async function loadComments(id){
+  const res = await fetch(`${API}/tracks/${id}/comments`);
+  return await res.json();
+}
+
 async function addComment(id){
   const input = document.getElementById(`c-${id}`);
-  const text = input.value.trim();
-  if(!text) return;
 
   await fetch(`${API}/tracks/${id}/comments`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ nickname:"user", comment:text })
+    body: JSON.stringify({
+      nickname:"user",
+      comment: input.value
+    })
   });
 
   input.value = "";
-  delete commentCache[id];
-  render();
+  loadTracks();
 }
 
-/* ---------------- RENDER COMMENTS ---------------- */
+/* ---------------- TAG CLICK FILTER ---------------- */
 
-function renderComments(id, comments){
-  const expanded = expandedComments[id];
-  const visible = expanded ? comments : comments.slice(0,2);
-
-  return `
-    ${visible.map(c => `
-      <div>💬 <b>${c.nickname}</b>: ${c.comment}</div>
-    `).join("")}
-
-    ${comments.length > 2 ? `
-      <button class="smallBtn" onclick="toggleComments(${id})">
-        ${expanded ? "less" : `more (${comments.length})`}
-      </button>
-    ` : ""}
-  `;
+function setTag(tag){
+  activeTag = tag;
+  render();
 }
 
 /* ---------------- RENDER ---------------- */
 
 async function render(){
+
   const box = document.getElementById("tracks");
+  box.innerHTML = "";
 
-  const list = filterTracks(tracks);
+  for(const t of tracks){
 
-  const html = await Promise.all(list.map(async t => {
+    if(!matchTag(t)) continue;
 
     const comments = await loadComments(t.id);
+    const tags = parseTags(t.hashtags);
 
-    const tags = (t.hashtags || "")
-      .split(" ")
-      .filter(Boolean)
-      .map(tag => `<span class="tag" onclick="setTag('${tag}')">${tag}</span>`)
-      .join("");
-
-    return `
+    box.innerHTML += `
       <div class="track">
 
         <div class="delete" onclick="deleteTrack(${t.id})">🗑</div>
 
         <div class="top">
           <div class="nick">${t.nickname}</div>
-          <div class="like" onclick="likeTrack(${t.id})">💖 ${t.likes}</div>
+
+          <div class="like" onclick="likeTrack(${t.id})">
+            💖 ${t.likes}
+          </div>
         </div>
 
         <a href="${t.track_url}" target="_blank">OPEN</a>
 
-        ${tags ? `<div class="tags">${tags}</div>` : ""}
+        ${tags.length ? `
+          <div class="tags">
+            ${tags.map(tag =>
+              `<span onclick="setTag('${tag}')">#${tag}</span>`
+            ).join("")}
+          </div>
+        ` : ""}
 
-        ${embed(t.track_url) ? `<iframe src="${embed(t.track_url)}"></iframe>` : ""}
+        ${embed(t.track_url) ? `
+          <iframe src="${embed(t.track_url)}"></iframe>
+        ` : ""}
 
         <div class="comments">
-          ${renderComments(t.id, comments)}
+          ${comments.slice(0,3).map(c =>
+            `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`
+          ).join("")}
+
+          ${comments.length > 3 ? `<div class="more">...more</div>` : ""}
         </div>
 
-        <input id="c-${t.id}" class="commentBox">
+        <input id="c-${t.id}" class="commentBox" placeholder="comment...">
         <button class="smallBtn" onclick="addComment(${t.id})">send</button>
 
       </div>
     `;
-  }));
-
-  box.innerHTML = html.join("");
+  }
 }
-
-/* ---------------- INIT ---------------- */
 
 loadTracks();
 setInterval(loadTracks, 30000);
