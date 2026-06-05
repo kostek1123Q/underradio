@@ -1,4 +1,4 @@
-const API = "https://YOUR-RENDER-URL"; // <- ZMIEN TO
+const API = https://underradio-backend.onrender.com"; // <- ZMIEN TO
 
 let tracks = [];
 
