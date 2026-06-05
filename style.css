@@ -1,117 +1,231 @@
-body{
+*{
 margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
 font-family:'Space Grotesk',sans-serif;
-background:#050505;
-color:white;
+background:#05070d;
+color:#fff;
 overflow-x:hidden;
+min-height:100vh;
 }
 
 .bg{
 position:fixed;
 inset:0;
-z-index:-1;
+z-index:-2;
 background:
-radial-gradient(circle at 20% 20%,#ff006e55,transparent 40%),
-radial-gradient(circle at 80% 40%,#8338ec55,transparent 40%),
-radial-gradient(circle at 40% 80%,#3a86ff55,transparent 40%);
-filter:blur(100px);
+radial-gradient(circle at 15% 20%,#ff00aa66,transparent 30%),
+radial-gradient(circle at 85% 30%,#00b7ff66,transparent 30%),
+radial-gradient(circle at 50% 80%,#9d4dff66,transparent 35%);
+filter:blur(120px);
+}
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background-image:
+linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+background-size:30px 30px;
+pointer-events:none;
+z-index:-1;
 }
 
 header{
 text-align:center;
-padding:40px 20px;
+padding:50px 20px;
 }
 
 header h1{
-font-size:3.5rem;
-background:linear-gradient(90deg,#ff006e,#8338ec,#3a86ff);
+font-size:4rem;
+font-weight:700;
+letter-spacing:3px;
+
+background:linear-gradient(
+90deg,
+#ffffff,
+#00d9ff,
+#ff00aa,
+#ffffff
+);
+
+background-size:300% 300%;
+animation:glow 8s linear infinite;
+
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
 
+header p{
+margin-top:10px;
+color:#9ca3af;
+}
+
+@keyframes glow{
+0%{background-position:0%}
+100%{background-position:300%}
+}
+
 .panel{
-max-width:700px;
+max-width:750px;
 margin:auto;
+padding:20px;
+
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(25px);
+
+border:1px solid rgba(255,255,255,.08);
+border-radius:25px;
+
 display:flex;
 flex-direction:column;
-gap:10px;
-padding:20px;
+gap:12px;
 }
 
 input{
-padding:14px;
-border-radius:12px;
-border:none;
-background:#111;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+padding:15px;
+border-radius:16px;
 color:white;
+font-size:15px;
+outline:none;
+}
+
+input:focus{
+border-color:#00d9ff;
+box-shadow:0 0 25px #00d9ff55;
 }
 
 button{
-padding:14px;
+padding:15px;
 border:none;
-border-radius:12px;
-background:linear-gradient(90deg,#ff006e,#8338ec);
-color:white;
-font-weight:700;
+border-radius:16px;
 cursor:pointer;
+
+font-weight:700;
+font-size:15px;
+
+background:
+linear-gradient(
+135deg,
+#00d9ff,
+#7c3aed,
+#ff00aa
+);
+
+color:white;
+
+transition:.2s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+.list{
+max-width:850px;
+margin:40px auto;
+padding:20px;
+}
+
+.list h2{
+margin-bottom:15px;
+font-size:2rem;
 }
 
 .track{
-background:#111;
-padding:18px;
-margin:15px;
-border-radius:16px;
-border:1px solid #222;
+margin-bottom:20px;
+
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,.08);
+border-radius:25px;
+
+padding:20px;
 }
 
 .top{
 display:flex;
 justify-content:space-between;
 align-items:center;
+margin-bottom:12px;
 }
 
 .nick{
-color:#ff006e;
 font-weight:700;
+font-size:18px;
+
+background:linear-gradient(
+90deg,
+#00d9ff,
+#ff00aa
+);
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .like{
+background:rgba(255,255,255,.08);
+padding:10px 15px;
+border-radius:15px;
 cursor:pointer;
-background:#222;
-padding:8px 12px;
-border-radius:10px;
+
+transition:.2s;
+}
+
+.like:hover{
+transform:scale(1.05);
+}
+
+.track a{
+display:inline-block;
+margin-bottom:12px;
+color:#00d9ff;
+text-decoration:none;
+}
+
+.track a:hover{
+text-decoration:underline;
 }
 
 iframe{
 width:100%;
-margin-top:10px;
-border-radius:12px;
-height:200px;
+height:250px;
 border:none;
-}
-
-.comments{
+border-radius:20px;
 margin-top:10px;
-font-size:14px;
-color:#bbb;
 }
 
 .commentBox{
 width:100%;
-margin-top:10px;
-padding:10px;
-border-radius:10px;
-background:#0f0f0f;
-border:none;
-color:white;
+margin-top:15px;
+padding:12px;
 }
 
 .smallBtn{
-margin-top:5px;
-padding:8px;
-border-radius:10px;
-background:#8338ec;
-border:none;
-color:white;
-cursor:pointer;
+margin-top:10px;
+width:100%;
+}
+
+@media(max-width:700px){
+
+header h1{
+font-size:2.8rem;
+}
+
+.track{
+padding:15px;
+}
+
+iframe{
+height:220px;
+}
+
 }
