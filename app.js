@@ -17,15 +17,24 @@ function setDeviceMode(){
 setDeviceMode();
 window.addEventListener("resize", setDeviceMode);
 
-/* ---------------- LOAD ---------------- */
+/* ---------------- LOAD (FIXED HARD) ---------------- */
 
 async function loadTracks(){
   try {
     const res = await fetch(`${API}/tracks`);
-    tracks = await res.json();
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+
+    tracks = Array.isArray(data) ? data : [];
+
     render();
+
   } catch (e) {
-    console.error("TRACK LOAD ERROR", e);
+    console.error("TRACK LOAD FAIL:", e);
+    tracks = [];
+    render();
   }
 }
 
@@ -59,7 +68,7 @@ function embed(url=""){
 /* ---------------- TAGS ---------------- */
 
 function parseTags(str=""){
-  return (str || "")
+  return str
     .split("#")
     .map(t => t.trim())
     .filter(Boolean);
@@ -67,17 +76,15 @@ function parseTags(str=""){
 
 function matchTag(track){
   if(!activeTag) return true;
-
-  const tags = parseTags(track.hashtags);
-  return tags.includes(activeTag);
+  return parseTags(track.hashtags || "").includes(activeTag);
 }
 
-/* ---------------- ADD TRACK ---------------- */
+/* ---------------- ADD ---------------- */
 
 async function addTrack(){
-  const nick = document.getElementById("nick").value.trim();
-  const url = document.getElementById("url").value.trim();
-  const tags = document.getElementById("tags").value.trim();
+  const nick = document.getElementById("nick").value;
+  const url = document.getElementById("url").value;
+  const tags = document.getElementById("tags").value;
 
   await fetch(`${API}/tracks`,{
     method:"POST",
@@ -88,10 +95,6 @@ async function addTrack(){
       hashtags: tags
     })
   });
-
-  document.getElementById("nick").value = "";
-  document.getElementById("url").value = "";
-  document.getElementById("tags").value = "";
 
   loadTracks();
 }
@@ -118,7 +121,7 @@ async function deleteTrack(id){
   loadTracks();
 }
 
-/* ---------------- COMMENTS (SAFE + NON-BLOCKING) ---------------- */
+/* ---------------- COMMENTS ---------------- */
 
 async function loadComments(id){
   try {
@@ -131,99 +134,77 @@ async function loadComments(id){
 
 async function addComment(id){
   const input = document.getElementById(`c-${id}`);
-  const value = input.value.trim();
-
-  if(!value) return;
+  const val = input.value.trim();
+  if(!val) return;
 
   await fetch(`${API}/tracks/${id}/comments`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
       nickname:"user",
-      comment: value
+      comment: val
     })
   });
 
   input.value = "";
-
-  // NIE reload całej listy (ważne)
-  render();
+  loadTracks();
 }
 
-/* ---------------- TAG FILTER ---------------- */
-
-function setTag(tag){
-  activeTag = tag;
-  render();
-}
-
-/* ---------------- RENDER (FIXED CORE ISSUE) ---------------- */
+/* ---------------- RENDER (FIXED CORE BUG) ---------------- */
 
 async function render(){
   const box = document.getElementById("tracks");
 
-  if(!tracks || tracks.length === 0){
+  if(!Array.isArray(tracks) || tracks.length === 0){
     box.innerHTML = "<div style='opacity:.6'>no tracks yet...</div>";
     return;
   }
 
-  box.innerHTML = "";
+  const html = await Promise.all(
+    tracks
+      .filter(matchTag)
+      .map(async (t) => {
+        const comments = await loadComments(t.id);
+        const tags = parseTags(t.hashtags || "");
 
-  const filtered = tracks.filter(matchTag);
+        return `
+          <div class="track">
 
-  for(const t of filtered){
+            <div class="delete" onclick="deleteTrack(${t.id})">🗑</div>
 
-    const el = document.createElement("div");
-    el.className = "track";
+            <div class="top">
+              <div class="nick">${t.nickname ?? ""}</div>
 
-    const tags = parseTags(t.hashtags);
+              <div class="like" onclick="likeTrack(${t.id})">
+                💖 ${t.likes ?? 0}
+              </div>
+            </div>
 
-    el.innerHTML = `
-      <div class="delete" onclick="deleteTrack(${t.id})">🗑</div>
+            <a href="${t.track_url}" target="_blank">OPEN</a>
 
-      <div class="top">
-        <div class="nick">${t.nickname ?? ""}</div>
+            ${tags.length ? `
+              <div class="tags">
+                ${tags.map(tag => `<span onclick="setTag('${tag}')">#${tag}</span>`).join("")}
+              </div>
+            ` : ""}
 
-        <div class="like" onclick="likeTrack(${t.id})">
-          💖 ${t.likes ?? 0}
-        </div>
-      </div>
+            ${embed(t.track_url) ? `<iframe src="${embed(t.track_url)}"></iframe>` : ""}
 
-      <a href="${t.track_url}" target="_blank">OPEN</a>
+            <div class="comments">
+              ${(comments || []).slice(0,3).map(c =>
+                `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`
+              ).join("")}
+            </div>
 
-      ${tags.length ? `
-        <div class="tags">
-          ${tags.map(tag =>
-            `<span onclick="setTag('${tag}')">#${tag}</span>`
-          ).join("")}
-        </div>
-      ` : ""}
+            <input id="c-${t.id}" class="commentBox" placeholder="comment...">
+            <button class="smallBtn" onclick="addComment(${t.id})">send</button>
 
-      ${embed(t.track_url) ? `
-        <iframe src="${embed(t.track_url)}"></iframe>
-      ` : ""}
+          </div>
+        `;
+      })
+  );
 
-      <div class="comments" id="comments-${t.id}">
-        loading comments...
-      </div>
-
-      <input id="c-${t.id}" class="commentBox" placeholder="comment...">
-      <button class="smallBtn" onclick="addComment(${t.id})">send</button>
-    `;
-
-    box.appendChild(el);
-
-    // 🔥 COMMENTS LOADING AFTER RENDER (NO BLOCK)
-    loadComments(t.id).then(comments => {
-      const cBox = document.getElementById(`comments-${t.id}`);
-      if(!cBox) return;
-
-      cBox.innerHTML = (comments || [])
-        .slice(0,3)
-        .map(c => `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`)
-        .join("");
-    });
-  }
+  box.innerHTML = html.join("");
 }
 
 /* ---------------- INIT ---------------- */
