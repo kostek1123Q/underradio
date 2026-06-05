@@ -1,16 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&family=Press+Start+2P&display=swap');
 
 :root{
-  --xp-blue:#2b579a;
-  --xp-blue2:#1e3f66;
-  --xp-sky:#4fc3ff;
-  --xp-pink:#ff4fd8;
+  /* XP underground palette */
+  --xp-bg:#05070c;
+  --xp-panel:#0b1220;
+  --xp-panel2:#0f1a2d;
+
+  --xp-blue:#3aa0ff;
+  --xp-blue2:#1b4d7a;
+
+  --xp-green:#00ff9a;
+  --xp-green2:#00c27a;
+
+  --xp-red:#ff3b6b;
   --xp-purple:#7a5cff;
-  --xp-bg:#cfe7ff;
-  --xp-panel:#e8f2ff;
-  --text:#10233f;
-  --muted:#3d5a7a;
-  --border:#7fb2ff;
+
+  --text:#e6f1ff;
+  --muted:#8aa4c7;
+  --border:#1f3a5a;
 }
 
 /* ---------------- BASE ---------------- */
@@ -18,21 +25,42 @@
 body{
   margin:0;
   font-family:Tahoma, sans-serif;
-  background: linear-gradient(180deg, var(--xp-bg), #ffffff);
+  background:
+    radial-gradient(circle at 20% 10%, #00ff9a12, transparent 40%),
+    radial-gradient(circle at 80% 30%, #3aa0ff12, transparent 45%),
+    radial-gradient(circle at 50% 90%, #7a5cff10, transparent 50%),
+    linear-gradient(180deg, var(--xp-bg), #02040a);
   color:var(--text);
   overflow-x:hidden;
 }
 
-/* XP soft glow background */
+/* XP underground noise grid */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   background:
-    radial-gradient(circle at 10% 20%, #4fc3ff55, transparent 40%),
-    radial-gradient(circle at 80% 30%, #ff4fd855, transparent 45%),
-    radial-gradient(circle at 40% 90%, #7a5cff33, transparent 50%);
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size:40px 40px;
   pointer-events:none;
+  opacity:0.25;
+}
+
+/* subtle scanline */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.15),
+    rgba(0,0,0,0.15) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events:none;
+  opacity:0.2;
 }
 
 /* ---------------- HEADER ---------------- */
@@ -40,22 +68,25 @@ body::before{
 header{
   text-align:center;
   padding:50px 20px 20px;
-  background: linear-gradient(180deg, #ffffffaa, transparent);
-  border-bottom:2px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background: linear-gradient(180deg, #0b1220cc, transparent);
+  backdrop-filter: blur(6px);
 }
 
 header h1{
   font-family:'Press Start 2P', monospace;
-  font-size:1.6rem;
-  color:var(--xp-blue);
-  text-shadow:1px 1px 0 white, 0 0 10px var(--xp-sky);
+  font-size:1.5rem;
+  color:var(--xp-green);
+  text-shadow:
+    0 0 8px var(--xp-green),
+    0 0 18px #00ff9a55;
   letter-spacing:1px;
 }
 
 header p{
   margin-top:10px;
   color:var(--muted);
-  font-size:14px;
+  font-size:13px;
 }
 
 /* ---------------- PANEL ---------------- */
@@ -68,52 +99,56 @@ header p{
   gap:10px;
   padding:20px;
 
-  background: linear-gradient(180deg, var(--xp-panel), #dff0ff);
-  border:2px solid var(--border);
-  border-radius:16px;
+  background: linear-gradient(180deg, var(--xp-panel), var(--xp-panel2));
+  border:1px solid var(--border);
+  border-radius:14px;
 
   box-shadow:
-    inset 0 0 0 1px #ffffff,
-    0 10px 30px rgba(0,0,0,0.1);
+    0 0 25px #00ff9a10,
+    inset 0 0 0 1px #0f2a44;
+  backdrop-filter: blur(10px);
 }
 
 input{
   padding:12px;
-  border-radius:8px;
-  border:2px solid var(--border);
-  background:white;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#050a12;
   color:var(--text);
   outline:none;
 }
 
 input:focus{
-  border-color:var(--xp-sky);
-  box-shadow:0 0 8px var(--xp-sky);
+  border-color:var(--xp-green);
+  box-shadow:0 0 12px #00ff9a55;
 }
+
+/* ---------------- BUTTON ---------------- */
 
 button{
   padding:12px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
 
-  background: linear-gradient(180deg, var(--xp-sky), var(--xp-blue));
-  color:white;
+  background: linear-gradient(90deg, var(--xp-green), var(--xp-blue));
+  color:#00140c;
   font-weight:700;
   cursor:pointer;
 
   box-shadow:
-    inset 0 1px 0 #ffffffaa,
-    0 4px 0 #1b3a66;
+    0 0 15px #00ff9a22,
+    inset 0 1px 0 #ffffff22;
+
   transition:0.15s;
 }
 
 button:hover{
   transform:translateY(-1px);
+  filter:brightness(1.1);
 }
 
 button:active{
   transform:translateY(2px);
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
 }
 
 /* ---------------- TRACK CARD ---------------- */
@@ -123,25 +158,37 @@ button:active{
   margin:15px auto;
   padding:18px;
 
-  background: linear-gradient(180deg, #ffffff, #d8ecff);
-  border:2px solid var(--border);
+  background: linear-gradient(180deg, #0b1220, #05070c);
+  border:1px solid var(--border);
   border-radius:14px;
 
   box-shadow:
-    inset 0 0 0 1px #fff,
-    0 8px 20px rgba(0,0,0,0.12);
+    0 0 20px #00ff9a10,
+    inset 0 0 0 1px #0f2a44;
+
   position:relative;
+  overflow:hidden;
 }
 
-/* XP top shine bar */
+/* XP underground neon strip */
 .track::before{
   content:"";
   position:absolute;
   top:0;
   left:0;
   width:100%;
-  height:3px;
-  background: linear-gradient(90deg, var(--xp-sky), var(--xp-purple), var(--xp-pink));
+  height:2px;
+  background: linear-gradient(90deg, var(--xp-green), var(--xp-blue), var(--xp-purple));
+  opacity:0.9;
+}
+
+/* scan glow overlay */
+.track::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 30% 20%, #00ff9a10, transparent 60%);
+  pointer-events:none;
 }
 
 /* ---------------- TOP BAR ---------------- */
@@ -154,42 +201,75 @@ button:active{
 
 .nick{
   font-weight:700;
-  color:var(--xp-blue);
+  color:var(--xp-green);
+  text-shadow:0 0 10px #00ff9a33;
 }
 
 .like{
   cursor:pointer;
-  background: linear-gradient(180deg, #ffffff, #cfe7ff);
-  border:2px solid var(--border);
+  background:#05070c;
+  border:1px solid var(--xp-green);
   padding:6px 10px;
   border-radius:10px;
-  color:var(--xp-blue);
+  color:var(--xp-green);
   font-weight:700;
+  transition:0.15s;
 }
 
 .like:hover{
-  background: linear-gradient(180deg, #eaf6ff, #bfe2ff);
+  box-shadow:0 0 12px #00ff9a55;
+}
+
+/* ---------------- DELETE ---------------- */
+
+.delete{
+  position:absolute;
+  top:10px;
+  right:10px;
+
+  width:28px;
+  height:28px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:8px;
+
+  background:#05070c;
+  border:1px solid var(--xp-red);
+  color:var(--xp-red);
+
+  cursor:pointer;
+  transition:0.15s;
+}
+
+.delete:hover{
+  background:var(--xp-red);
+  color:black;
+  box-shadow:0 0 12px #ff3b6b55;
 }
 
 /* ---------------- LINKS + EMBED ---------------- */
 
 a{
-  color:var(--xp-purple);
-  text-decoration:underline;
+  color:var(--xp-blue);
+  text-decoration:none;
   display:inline-block;
   margin-top:8px;
 }
 
 a:hover{
-  color:var(--xp-pink);
+  color:var(--xp-green);
+  text-shadow:0 0 8px #00ff9a66;
 }
 
 iframe{
   width:100%;
   margin-top:10px;
-  border-radius:10px;
-  height:200px;
-  border:2px solid var(--border);
+  border-radius:12px;
+  height:220px;
+  border:1px solid var(--border);
 }
 
 /* ---------------- COMMENTS ---------------- */
@@ -198,20 +278,22 @@ iframe{
   margin-top:10px;
   font-size:13px;
   color:var(--muted);
+
   max-height:120px;
   overflow:auto;
-  padding:8px;
+  padding:10px;
 
-  background:#f6fbff;
-  border:1px solid #b7d7ff;
+  background:#05070c;
+  border:1px solid var(--border);
   border-radius:10px;
 }
 
 .comments::-webkit-scrollbar{
   width:6px;
 }
+
 .comments::-webkit-scrollbar-thumb{
-  background:var(--xp-blue);
+  background:var(--xp-green);
   border-radius:10px;
 }
 
@@ -223,8 +305,8 @@ iframe{
   padding:10px;
 
   border-radius:10px;
-  background:white;
-  border:2px solid var(--border);
+  background:#05070c;
+  border:1px solid var(--border);
   color:var(--text);
 }
 
@@ -233,9 +315,9 @@ iframe{
   padding:8px 12px;
 
   border-radius:10px;
-  background: linear-gradient(180deg, var(--xp-pink), var(--xp-purple));
+  background: linear-gradient(90deg, var(--xp-green), var(--xp-blue));
   border:none;
-  color:white;
+  color:#00140c;
   font-weight:700;
   cursor:pointer;
 }
@@ -244,7 +326,7 @@ iframe{
 
 @media (max-width:600px){
   header h1{
-    font-size:1.1rem;
+    font-size:1rem;
   }
 
   .track{
