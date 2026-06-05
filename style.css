@@ -1,36 +1,20 @@
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-:root{
---pink:#ff006e;
---purple:#8338ec;
---blue:#3a86ff;
---dark:#080808;
---card:#111111;
-}
-
 body{
+margin:0;
 font-family:'Space Grotesk',sans-serif;
-background:var(--dark);
+background:#050505;
 color:white;
 overflow-x:hidden;
-min-height:100vh;
 }
 
-.background{
+.bg{
 position:fixed;
 inset:0;
 z-index:-1;
-
 background:
-radial-gradient(circle at 10% 20%,rgba(255,0,110,.4),transparent 30%),
-radial-gradient(circle at 80% 30%,rgba(131,56,236,.4),transparent 35%),
-radial-gradient(circle at 50% 80%,rgba(58,134,255,.4),transparent 35%);
-
-filter:blur(120px);
+radial-gradient(circle at 20% 20%,#ff006e55,transparent 40%),
+radial-gradient(circle at 80% 40%,#8338ec55,transparent 40%),
+radial-gradient(circle at 40% 80%,#3a86ff55,transparent 40%);
+filter:blur(100px);
 }
 
 header{
@@ -39,228 +23,95 @@ padding:40px 20px;
 }
 
 header h1{
-
-font-size:4rem;
-font-weight:700;
-
-background:
-linear-gradient(
-90deg,
-var(--pink),
-var(--purple),
-var(--blue)
-);
-
+font-size:3.5rem;
+background:linear-gradient(90deg,#ff006e,#8338ec,#3a86ff);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
 
-.subtitle{
-margin-top:10px;
-opacity:.8;
-}
-
-.glow-line{
-height:4px;
-width:220px;
+.panel{
+max-width:700px;
 margin:auto;
-margin-top:12px;
-
-background:
-linear-gradient(
-90deg,
-var(--pink),
-var(--purple),
-var(--blue)
-);
-
-border-radius:20px;
-}
-
-.submit-box{
-
-max-width:800px;
-margin:auto;
-
-padding:20px;
-
 display:flex;
 flex-direction:column;
-gap:15px;
-}
-
-.submit-box input{
-
-padding:16px;
-
-border:none;
-outline:none;
-
-background:#121212;
-
-color:white;
-
-border-radius:16px;
-
-font-size:1rem;
-}
-
-.submit-box button{
-
-padding:16px;
-
-border:none;
-border-radius:16px;
-
-cursor:pointer;
-
-font-weight:700;
-
-background:
-linear-gradient(
-90deg,
-var(--pink),
-var(--purple)
-);
-
-color:white;
-}
-
-.ranking{
-max-width:1000px;
-margin:auto;
-padding:30px 20px;
-}
-
-.ranking h2{
-margin-bottom:20px;
-}
-
-.track-card{
-
-background:
-rgba(15,15,15,.85);
-
-backdrop-filter:blur(20px);
-
-border:1px solid rgba(255,255,255,.05);
-
+gap:10px;
 padding:20px;
-
-border-radius:24px;
-
-margin-bottom:25px;
 }
 
-.track-top{
+input{
+padding:14px;
+border-radius:12px;
+border:none;
+background:#111;
+color:white;
+}
 
+button{
+padding:14px;
+border:none;
+border-radius:12px;
+background:linear-gradient(90deg,#ff006e,#8338ec);
+color:white;
+font-weight:700;
+cursor:pointer;
+}
+
+.track{
+background:#111;
+padding:18px;
+margin:15px;
+border-radius:16px;
+border:1px solid #222;
+}
+
+.top{
 display:flex;
 justify-content:space-between;
 align-items:center;
-gap:10px;
 }
 
-.nickname{
-color:var(--pink);
+.nick{
+color:#ff006e;
 font-weight:700;
 }
 
-.track-link{
-display:inline-block;
-margin-top:8px;
-color:var(--blue);
-text-decoration:none;
-}
-
-.likes{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.like-btn{
-
-background:#222;
-
-border:none;
-
-padding:10px 15px;
-
-border-radius:12px;
-
-color:white;
-
+.like{
 cursor:pointer;
+background:#222;
+padding:8px 12px;
+border-radius:10px;
 }
 
-.preview{
-margin-top:18px;
-}
-
-.preview iframe{
-
+iframe{
 width:100%;
-height:220px;
-
+margin-top:10px;
+border-radius:12px;
+height:200px;
 border:none;
-
-border-radius:16px;
 }
 
 .comments{
-
-margin-top:20px;
+margin-top:10px;
+font-size:14px;
+color:#bbb;
 }
 
-.comment{
-
-padding:10px 0;
-border-bottom:1px solid #222;
-}
-
-.comment-input{
-
+.commentBox{
 width:100%;
-
 margin-top:10px;
-
-padding:12px;
-
-background:#1a1a1a;
-
+padding:10px;
+border-radius:10px;
+background:#0f0f0f;
 border:none;
-
-border-radius:12px;
-
 color:white;
 }
 
-.comment-btn{
-
-margin-top:10px;
-
-padding:12px 18px;
-
+.smallBtn{
+margin-top:5px;
+padding:8px;
+border-radius:10px;
+background:#8338ec;
 border:none;
-
-border-radius:12px;
-
-background:var(--purple);
-
 color:white;
-
 cursor:pointer;
-}
-
-@media(max-width:700px){
-
-header h1{
-font-size:2.8rem;
-}
-
-.track-top{
-flex-direction:column;
-align-items:flex-start;
-}
-
 }
