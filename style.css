@@ -1,39 +1,262 @@
-.tag{
-  display:inline-block;
-  padding:6px 10px;
-  margin:4px 4px 0 0;
-  border-radius:999px;
-  font-size:12px;
-  background:linear-gradient(90deg,#ff00cc,#3333ff);
-  color:white;
-  cursor:pointer;
-  box-shadow:0 0 10px #ff00cc55;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Press+Start+2P&display=swap');
+
+:root{
+  --bg:#050006;
+  --panel:#0d0012;
+  --pink:#ff2ea6;
+  --pink2:#ff66cc;
+  --neon:#ff00cc;
+  --text:#f5e9ff;
+  --muted:#b98bbf;
+  --border:#2a0b2f;
 }
 
-.track{
+/* ---------------- BASE ---------------- */
+
+body{
+  margin:0;
+  font-family:'Space Grotesk', sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+/* grain / old web noise */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity:0.08;
+  pointer-events:none;
+  mix-blend-mode:screen;
+}
+
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 20% 20%, #ff00cc33, transparent 40%),
+    radial-gradient(circle at 80% 40%, #ff2ea633, transparent 45%),
+    radial-gradient(circle at 50% 90%, #7a00ff22, transparent 50%);
+  filter: blur(90px);
+}
+
+/* ---------------- HEADER ---------------- */
+
+header{
+  text-align:center;
+  padding:50px 20px 20px;
+}
+
+header h1{
+  font-family:'Press Start 2P', monospace;
+  font-size:2rem;
+  letter-spacing:2px;
+
+  color:var(--pink);
+
+  text-shadow:
+    0 0 5px var(--pink),
+    0 0 15px var(--neon),
+    0 0 30px #ff00cc55;
+}
+
+header p{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ---------------- PANEL ---------------- */
+
+.panel{
+  max-width:720px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:20px;
+}
+
+input{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#0a0010;
+  color:var(--text);
+  outline:none;
+
+  box-shadow: inset 0 0 10px #000;
+}
+
+input:focus{
+  border-color:var(--pink);
+  box-shadow:0 0 15px #ff00cc55;
+}
+
+button{
+  padding:14px;
+  border:none;
+  border-radius:12px;
+
+  background:linear-gradient(90deg,var(--pink),var(--neon));
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+
+  box-shadow:0 0 20px #ff00cc55;
   transition:0.2s;
 }
 
-.track:hover{
-  transform:scale(1.01);
-  border-color:#ff00cc55;
+button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 0 30px #ff00cc88;
 }
 
-/* KOMPAKT MODE */
-.compact .track iframe{
-  height:120px;
+/* ---------------- TRACK CARD ---------------- */
+
+.track{
+  max-width:720px;
+  margin:15px auto;
+  padding:18px;
+
+  background:linear-gradient(180deg,#0b0010,#07000b);
+  border:1px solid var(--border);
+  border-radius:16px;
+
+  box-shadow:
+    0 0 20px #000,
+    inset 0 0 10px #000;
+  position:relative;
+  overflow:hidden;
 }
 
-.compact .comments{
-  display:none;
+/* chrome glow line */
+.track::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--pink),var(--neon),transparent);
+  opacity:0.8;
 }
 
-/* MOBILE UX */
-@media(max-width:700px){
-  header h1{ font-size:2.2rem; }
+/* ---------------- TOP BAR ---------------- */
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.nick{
+  font-weight:700;
+  color:var(--pink);
+  text-shadow:0 0 8px #ff00cc55;
+}
+
+.like{
+  cursor:pointer;
+  background:#140018;
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:10px;
+
+  color:var(--pink2);
+  transition:0.2s;
+}
+
+.like:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 12px #ff00cc55;
+}
+
+/* ---------------- LINKS + EMBED ---------------- */
+
+a{
+  color:var(--pink2);
+  text-decoration:none;
+  display:inline-block;
+  margin-top:8px;
+}
+
+a:hover{
+  text-shadow:0 0 10px #ff00cc;
+}
+
+iframe{
+  width:100%;
+  margin-top:10px;
+  border-radius:12px;
+  height:200px;
+  border:1px solid var(--border);
+}
+
+/* ---------------- COMMENTS ---------------- */
+
+.comments{
+  margin-top:10px;
+  font-size:13px;
+  color:#d9b3e6;
+  max-height:120px;
+  overflow:auto;
+  padding-right:6px;
+}
+
+/* scrollbar Y2K style */
+.comments::-webkit-scrollbar{
+  width:6px;
+}
+.comments::-webkit-scrollbar-thumb{
+  background:var(--pink);
+  border-radius:10px;
+}
+
+/* ---------------- INPUT COMMENT ---------------- */
+
+.commentBox{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+
+  border-radius:10px;
+  background:#0a0010;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+
+.smallBtn{
+  margin-top:6px;
+  padding:8px 12px;
+
+  border-radius:10px;
+  background:linear-gradient(90deg,#ff2ea6,#7a00ff);
+  border:none;
+  color:white;
+  cursor:pointer;
+}
+
+/* ---------------- MOBILE MODE ---------------- */
+
+@media (max-width:600px){
+  header h1{
+    font-size:1.4rem;
+  }
 
   .track{
     margin:10px;
-    padding:12px;
+    padding:14px;
+  }
+
+  iframe{
+    height:160px;
+  }
+
+  .comments{
+    max-height:90px;
   }
 }
