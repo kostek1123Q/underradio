@@ -3,43 +3,45 @@ const API = "https://underradio-backend.onrender.com";
 let tracks = [];
 
 /* --------------------------
-   🔥 KEEP ALIVE (Pobudzanie Rendera)
+   🔥 KEEP ALIVE (bezpieczny)
 ---------------------------*/
-
 function keepAlive(){
   fetch(`${API}/test`)
-    .then(() => console.log("KEEP ALIVE OK"))
-    .catch(() => console.log("KEEP ALIVE FAIL"));
+    .then(r => console.log("PING OK:", r.status))
+    .catch(e => console.log("PING FAIL:", e.message));
 }
-
-// co 20 sekund
-setInterval(keepAlive, 20000);
-
-// start od razu
+setInterval(keepAlive, 25000);
 keepAlive();
 
 /* --------------------------
-   LOAD TRACKS
+   LOAD TRACKS (SAFE)
 ---------------------------*/
-
 async function loadTracks(){
   try {
     const res = await fetch(`${API}/tracks`);
+
+    if(!res.ok){
+      console.log("TRACKS ERROR STATUS:", res.status);
+      return;
+    }
+
     tracks = await res.json();
     render();
+
   } catch (e) {
-    console.log("LOAD ERROR", e);
+    console.log("LOAD ERROR:", e.message);
   }
 }
 
 /* --------------------------
    EMBED
 ---------------------------*/
-
 function embed(url){
 
+  if(!url) return "";
+
   if(url.includes("youtube.com/watch")){
-    const id = url.split("v=")[1].split("&")[0];
+    const id = url.split("v=")[1]?.split("&")[0];
     return `https://www.youtube.com/embed/${id}`;
   }
 
@@ -60,78 +62,103 @@ function embed(url){
 }
 
 /* --------------------------
-   ADD TRACK
+   ADD TRACK (FULL DEBUG FIX)
 ---------------------------*/
-
 async function addTrack(){
 
-  const nick = document.getElementById("nick").value;
-  const url = document.getElementById("url").value;
+  const nick = document.getElementById("nick").value.trim();
+  const url = document.getElementById("url").value.trim();
 
-  if(!nick || !url) return alert("uzupełnij pola");
+  console.log("ADD CLICK:", {nick, url});
 
-  await fetch(`${API}/tracks`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      nickname:nick,
-      track_url:url
-    })
-  });
+  if(!nick || !url){
+    alert("UZUPEŁNIJ POLA");
+    return;
+  }
 
-  document.getElementById("nick").value="";
-  document.getElementById("url").value="";
+  try {
 
-  loadTracks();
+    const res = await fetch(`${API}/tracks`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        nickname:nick,
+        track_url:url
+      })
+    });
+
+    const text = await res.text();
+    console.log("RESPONSE:", res.status, text);
+
+    if(!res.ok){
+      alert("BŁĄD BACKEND: " + text);
+      return;
+    }
+
+    alert("DODANO ✔");
+
+    document.getElementById("nick").value = "";
+    document.getElementById("url").value = "";
+
+    loadTracks();
+
+  } catch (e) {
+    console.log("FETCH ERROR:", e);
+    alert("BRAK POŁĄCZENIA: " + e.message);
+  }
 }
 
 /* --------------------------
    LIKE
 ---------------------------*/
-
 async function likeTrack(id){
-  await fetch(`${API}/tracks/${id}/like`,{
-    method:"POST"
-  });
-
-  loadTracks();
+  try {
+    await fetch(`${API}/tracks/${id}/like`,{method:"POST"});
+    loadTracks();
+  } catch(e){
+    alert("LIKE ERROR");
+  }
 }
 
 /* --------------------------
    COMMENTS
 ---------------------------*/
-
 async function addComment(id){
 
   const input = document.getElementById(`c-${id}`);
-  const value = input.value;
+  const value = input.value.trim();
 
   if(!value) return;
 
-  await fetch(`${API}/tracks/${id}/comments`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      nickname:"user",
-      comment:value
-    })
-  });
+  try {
+    await fetch(`${API}/tracks/${id}/comments`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        nickname:"user",
+        comment:value
+      })
+    });
 
-  loadTracks();
+    input.value = "";
+    loadTracks();
+
+  } catch(e){
+    alert("COMMENT ERROR");
+  }
 }
 
 /* --------------------------
    RENDER
 ---------------------------*/
-
 function render(){
 
   tracks.sort((a,b)=>b.likes-a.likes);
 
   const box = document.getElementById("tracks");
-  box.innerHTML="";
+  box.innerHTML = "";
 
-  tracks.forEach(t=>{
+  tracks.forEach(t => {
 
     box.innerHTML += `
       <div class="track">
@@ -161,6 +188,5 @@ function render(){
 /* --------------------------
    INIT
 ---------------------------*/
-
 loadTracks();
 setInterval(loadTracks, 5000);
