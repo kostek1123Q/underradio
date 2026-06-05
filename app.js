@@ -2,42 +2,13 @@ const API = "https://underradio-backend.onrender.com";
 
 let tracks = [];
 
-/* --------------------------
-   🔥 KEEP ALIVE (bezpieczny)
----------------------------*/
-function keepAlive(){
-  fetch(`${API}/test`)
-    .then(r => console.log("PING OK:", r.status))
-    .catch(e => console.log("PING FAIL:", e.message));
-}
-setInterval(keepAlive, 25000);
-keepAlive();
-
-/* --------------------------
-   LOAD TRACKS (SAFE)
----------------------------*/
 async function loadTracks(){
-  try {
-    const res = await fetch(`${API}/tracks`);
-
-    if(!res.ok){
-      console.log("TRACKS ERROR STATUS:", res.status);
-      return;
-    }
-
-    tracks = await res.json();
-    render();
-
-  } catch (e) {
-    console.log("LOAD ERROR:", e.message);
-  }
+  const res = await fetch(`${API}/tracks`);
+  tracks = await res.json();
+  render();
 }
 
-/* --------------------------
-   EMBED
----------------------------*/
 function embed(url){
-
   if(!url) return "";
 
   if(url.includes("youtube.com/watch")){
@@ -51,7 +22,8 @@ function embed(url){
   }
 
   if(url.includes("spotify")){
-    return url.replace("open.spotify.com","open.spotify.com/embed");
+    const id = url.split("/track/")[1]?.split("?")[0];
+    return `https://open.spotify.com/embed/track/${id}`;
   }
 
   if(url.includes("soundcloud")){
@@ -61,104 +33,63 @@ function embed(url){
   return "";
 }
 
-/* --------------------------
-   ADD TRACK (FULL DEBUG FIX)
----------------------------*/
+/* ---------------- COMMENTS FIX ---------------- */
+
+async function loadComments(id){
+  const res = await fetch(`${API}/tracks/${id}/comments`);
+  return await res.json();
+}
+
+/* ---------------- ADD TRACK ---------------- */
+
 async function addTrack(){
+  const nick = document.getElementById("nick").value;
+  const url = document.getElementById("url").value;
 
-  const nick = document.getElementById("nick").value.trim();
-  const url = document.getElementById("url").value.trim();
+  await fetch(`${API}/tracks`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ nickname:nick, track_url:url })
+  });
 
-  console.log("ADD CLICK:", {nick, url});
-
-  if(!nick || !url){
-    alert("UZUPEŁNIJ POLA");
-    return;
-  }
-
-  try {
-
-    const res = await fetch(`${API}/tracks`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        nickname:nick,
-        track_url:url
-      })
-    });
-
-    const text = await res.text();
-    console.log("RESPONSE:", res.status, text);
-
-    if(!res.ok){
-      alert("BŁĄD BACKEND: " + text);
-      return;
-    }
-
-    alert("DODANO ✔");
-
-    document.getElementById("nick").value = "";
-    document.getElementById("url").value = "";
-
-    loadTracks();
-
-  } catch (e) {
-    console.log("FETCH ERROR:", e);
-    alert("BRAK POŁĄCZENIA: " + e.message);
-  }
+  loadTracks();
 }
 
-/* --------------------------
-   LIKE
----------------------------*/
+/* ---------------- LIKE ---------------- */
+
 async function likeTrack(id){
-  try {
-    await fetch(`${API}/tracks/${id}/like`,{method:"POST"});
-    loadTracks();
-  } catch(e){
-    alert("LIKE ERROR");
-  }
+  await fetch(`${API}/tracks/${id}/like`, { method:"POST" });
+  loadTracks();
 }
 
-/* --------------------------
-   COMMENTS
----------------------------*/
+/* ---------------- COMMENT ---------------- */
+
 async function addComment(id){
-
   const input = document.getElementById(`c-${id}`);
-  const value = input.value.trim();
 
-  if(!value) return;
+  await fetch(`${API}/tracks/${id}/comments`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      nickname:"user",
+      comment: input.value
+    })
+  });
 
-  try {
-    await fetch(`${API}/tracks/${id}/comments`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        nickname:"user",
-        comment:value
-      })
-    });
-
-    input.value = "";
-    loadTracks();
-
-  } catch(e){
-    alert("COMMENT ERROR");
-  }
+  input.value = "";
+  loadTracks();
 }
 
-/* --------------------------
-   RENDER
----------------------------*/
-function render(){
+/* ---------------- RENDER ---------------- */
 
-  tracks.sort((a,b)=>b.likes-a.likes);
+async function render(){
 
   const box = document.getElementById("tracks");
   box.innerHTML = "";
 
-  tracks.forEach(t => {
+  for(const t of tracks){
+
+    const comments = await loadComments(t.id);
 
     box.innerHTML += `
       <div class="track">
@@ -167,26 +98,29 @@ function render(){
           <div class="nick">${t.nickname}</div>
 
           <div class="like" onclick="likeTrack(${t.id})">
-            🔥 ${t.likes}
+            💖 ${t.likes}
           </div>
         </div>
 
-        <a href="${t.track_url}" target="_blank">open link</a>
+        <a href="${t.track_url}" target="_blank">OPEN</a>
 
         ${embed(t.track_url) ? `
           <iframe src="${embed(t.track_url)}"></iframe>
         ` : ""}
 
-        <input class="commentBox" id="c-${t.id}" placeholder="komentarz">
-        <button class="smallBtn" onclick="addComment(${t.id})">dodaj</button>
+        <div class="comments">
+          ${comments.map(c =>
+            `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`
+          ).join("")}
+        </div>
+
+        <input id="c-${t.id}" class="commentBox" placeholder="comment...">
+        <button class="smallBtn" onclick="addComment(${t.id})">send</button>
 
       </div>
     `;
-  });
+  }
 }
 
-/* --------------------------
-   INIT
----------------------------*/
 loadTracks();
 setInterval(loadTracks, 5000);
