@@ -2,6 +2,25 @@ const API = "https://underradio-backend.onrender.com";
 
 let tracks = [];
 
+/* ---------------- KEEP ALIVE ---------------- */
+
+let lastPing = 0;
+
+async function smartKeepAlive(){
+  const now = Date.now();
+  if(now - lastPing < 60000) return;
+  if(document.hidden) return;
+
+  lastPing = now;
+
+  try {
+    await fetch(`${API}/test`);
+  } catch {}
+}
+
+smartKeepAlive();
+setInterval(smartKeepAlive, 15000);
+
 /* ---------------- LOAD ---------------- */
 
 async function loadTracks(){
@@ -21,7 +40,8 @@ function embed(url){
   }
 
   if(url.includes("youtu.be")){
-    return `https://www.youtube.com/embed/${url.split("/").pop()}`;
+    const id = url.split("/").pop();
+    return `https://www.youtube.com/embed/${id}`;
   }
 
   if(url.includes("spotify")){
@@ -36,29 +56,23 @@ function embed(url){
   return "";
 }
 
-/* ---------------- COMMENTS ---------------- */
+/* ---------------- DELETE ---------------- */
 
-async function loadComments(id){
-  const res = await fetch(`${API}/tracks/${id}/comments`);
-  return await res.json();
-}
+async function deleteTrack(id){
+  const pass = prompt("ADMIN PASSWORD:");
 
-/* ---------------- ADD TRACK ---------------- */
+  if(!pass) return;
 
-async function addTrack(){
-  const nick = document.getElementById("nick").value;
-  const url = document.getElementById("url").value;
-  const tags = document.getElementById("tags")?.value || "";
-
-  await fetch(`${API}/tracks`,{
-    method:"POST",
+  const res = await fetch(`${API}/tracks/${id}`, {
+    method:"DELETE",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      nickname:nick,
-      track_url:url,
-      hashtags: tags
-    })
+    body: JSON.stringify({ password: pass })
   });
+
+  if(!res.ok){
+    alert("WRONG PASSWORD");
+    return;
+  }
 
   loadTracks();
 }
@@ -66,11 +80,16 @@ async function addTrack(){
 /* ---------------- LIKE ---------------- */
 
 async function likeTrack(id){
-  await fetch(`${API}/tracks/${id}/like`,{method:"POST"});
+  await fetch(`${API}/tracks/${id}/like`, { method:"POST" });
   loadTracks();
 }
 
-/* ---------------- COMMENT ---------------- */
+/* ---------------- COMMENTS ---------------- */
+
+async function loadComments(id){
+  const res = await fetch(`${API}/tracks/${id}/comments`);
+  return await res.json();
+}
 
 async function addComment(id){
   const input = document.getElementById(`c-${id}`);
@@ -84,7 +103,7 @@ async function addComment(id){
     })
   });
 
-  input.value="";
+  input.value = "";
   loadTracks();
 }
 
@@ -98,56 +117,33 @@ async function render(){
 
     const comments = await loadComments(t.id);
 
-    const tags = (t.hashtags || "")
-      .split(" ")
-      .filter(Boolean)
-      .map(tag => `<span class="tag" onclick="filterTag('${tag}')">${tag}</span>`)
-      .join("");
-
-    const previewComments = comments.slice(0,3);
-    const more = comments.length > 3;
-
     box.innerHTML += `
       <div class="track">
 
         <div class="top">
           <div class="nick">${t.nickname}</div>
-          <div class="like" onclick="likeTrack(${t.id})">💖 ${t.likes}</div>
+
+          <div style="display:flex; gap:10px;">
+            <div class="like" onclick="likeTrack(${t.id})">💖 ${t.likes}</div>
+            <div class="trash" onclick="deleteTrack(${t.id})">🗑</div>
+          </div>
         </div>
 
         <a href="${t.track_url}" target="_blank">OPEN</a>
 
-        <div>${tags}</div>
-
         ${embed(t.track_url) ? `<iframe src="${embed(t.track_url)}"></iframe>` : ""}
 
         <div class="comments">
-          ${previewComments.map(c =>
-            `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`
-          ).join("")}
-
-          ${more ? `<div onclick="toggleComments(${t.id})">+ more</div>` : ""}
+          ${comments.map(c => `<div>💬 <b>${c.nickname}</b>: ${c.comment}</div>`).join("")}
         </div>
 
-        <input id="c-${t.id}" class="commentBox">
+        <input id="c-${t.id}" class="commentBox" placeholder="comment">
         <button class="smallBtn" onclick="addComment(${t.id})">send</button>
 
       </div>
     `;
   }
 }
-
-/* ---------------- FILTER TAG ---------------- */
-
-function filterTag(tag){
-  document.querySelectorAll(".track").forEach(el=>{
-    if(!el.innerText.includes(tag)){
-      el.style.display="none";
-    }
-  });
-}
-
-/* ---------------- INIT ---------------- */
 
 loadTracks();
 setInterval(loadTracks, 25000);
