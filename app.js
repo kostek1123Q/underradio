@@ -3,6 +3,18 @@ const API = "https://underradio-backend.onrender.com";
 let tracks = [];
 let activeTag = null;
 
+function setDeviceMode(){
+  const isMobile =
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth < 768;
+
+  document.body.classList.toggle("mobile", isMobile);
+  document.body.classList.toggle("desktop", !isMobile);
+}
+
+setDeviceMode();
+window.addEventListener("resize", setDeviceMode);
+
 /* ---------------- LOAD ---------------- */
 
 async function loadTracks(){
