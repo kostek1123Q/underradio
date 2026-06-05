@@ -1,69 +1,62 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UnderRadio</title>
-    <link rel="stylesheet" href="css/style.css" />
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>UNDER RADIO</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+
 </head>
+
 <body>
 
-<header class="header">
-    <h1>UnderRadio</h1>
-    <nav id="nav-links">
-        <a href="index.html">Home</a>
-        <a href="top.html">Top Tygodnia</a>
-        <a href="login.html" id="login-link">Logowanie</a>
-        <a href="register.html" id="register-link">Rejestracja</a>
-        <script type="module" src="js/auth-display.js"></script>
-        <!-- Profil i Dodaj utwór wstawiane dynamicznie po zalogowaniu -->
-    </nav>
-</header>
+<div class="background"></div>
 
-<main class="container">
+<header>
 
-    <!-- Sekcja dodawania utworu -->
-    <section id="upload-section" style="display:none;">
-        <h2>Dodaj swój utwór</h2>
-        <form id="upload-form">
-            <input type="text" id="title" placeholder="Tytuł utworu" required />
-            <textarea id="description" placeholder="Opis utworu"></textarea>
-            <input type="url" id="social" placeholder="Link do sociali (opcjonalnie)" />
-            <input type="file" id="audio" accept="audio/*" required />
-            <label>
-                Start fragmentu (sekundy):
-                <input type="number" id="start" min="0" value="0" required />
-            </label>
-            <label>
-                Koniec fragmentu (sekundy):
-                <input type="number" id="end" min="1" value="30" required />
-            </label>
-            <button type="submit">Dodaj utwór</button>
-        </form>
-    </section>
-
-    <!-- Lista tracków -->
-    <section id="tracks-list">
-        <!-- Tracki będą ładowane dynamicznie -->
-    </section>
-
-</main>
-
-<!-- GLOBALNY PLAYER -->
-<div id="global-player" class="global-player" style="display:none;">
-    <div id="player-title">Tytuł utworu</div>
-    <button id="player-toggle">Play</button>
-    <audio id="player-audio" src="" preload="none"></audio>
+<div class="logo-wrap">
+<h1>UNDER RADIO</h1>
+<div class="glow-line"></div>
 </div>
 
-<footer class="footer">
-    <p>UnderRadio © 2025</p>
-</footer>
+<p class="subtitle">
+Wrzucaj muzykę. Zdobywaj lajki. Wchodź na szczyt.
+</p>
 
-<script src="js/api.js"></script>
-<script src="js/main.js"></script>
-<script src="js/likes.js"></script>
-<script src="js/upload.js"></script>
-<script src="js/player.js"></script>
+</header>
+
+<section class="submit-box">
+
+<input
+id="nickname"
+type="text"
+placeholder="Twój nick">
+
+<input
+id="trackLink"
+type="text"
+placeholder="Link Spotify / SoundCloud / YouTube">
+
+<button id="submitTrack">
+DODAJ TRACK
+</button>
+
+</section>
+
+<section class="ranking">
+
+<h2>TOP TRACKS</h2>
+
+<div id="trackList"></div>
+
+</section>
+
+<script src="app.js"></script>
+
 </body>
 </html>
