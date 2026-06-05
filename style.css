@@ -1,40 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap');
-
-/* ================= ROOT ================= */
+/* =========================
+   WINDOWS 98 / XP CLASSIC UI
+   ========================= */
 
 :root{
-  --win-bg:#c0c0c0;
+  --win-bg:#d4d0c8;
+  --win-panel:#ece9d8;
   --win-dark:#808080;
   --win-darker:#404040;
   --win-light:#ffffff;
-  --win-blue:#000080;
   --win-border:#000000;
-  --text:#000000;
+  --win-blue:#0a246a;
+  --win-text:#000000;
 }
 
-/* ================= BASE ================= */
+/* ---------------- BASE ---------------- */
 
 body{
   margin:0;
-  font-family:Tahoma, sans-serif;
+  font-family: Tahoma, Arial, sans-serif;
   background: var(--win-bg);
-  color:var(--text);
+  color: var(--win-text);
 }
 
-/* ================= HEADER ================= */
+/* classic Windows desktop feel */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(
+    45deg,
+    #d4d0c8,
+    #d4d0c8 10px,
+    #cfcac1 10px,
+    #cfcac1 20px
+  );
+  opacity:0.15;
+  pointer-events:none;
+}
+
+/* ---------------- HEADER ---------------- */
 
 header{
-  background: linear-gradient(180deg, #e6e6e6, #c0c0c0);
+  background: var(--win-panel);
   border-bottom:2px solid var(--win-dark);
   padding:20px;
   text-align:center;
 }
 
 header h1{
-  font-size:20px;
-  margin:0;
-  color:var(--win-blue);
+  font-size:22px;
   font-weight:bold;
+  margin:0;
 }
 
 header p{
@@ -42,199 +58,230 @@ header p{
   font-size:12px;
 }
 
-/* ================= PANELS ================= */
+/* ---------------- INPUT PANEL ---------------- */
 
 .panel{
-  width:90%;
-  max-width:600px;
+  width:600px;
+  max-width:90%;
   margin:20px auto;
-  padding:10px;
+  padding:12px;
 
-  background: var(--win-bg);
+  background: var(--win-panel);
 
   border-top:2px solid var(--win-light);
   border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
 }
-
-/* ================= INPUTS ================= */
 
 input{
   width:100%;
-  margin:5px 0;
+  margin-top:8px;
   padding:6px;
 
-  font-family:Tahoma;
-  font-size:12px;
+  font-family: Tahoma, Arial;
+  font-size:13px;
 
-  background:white;
   border:2px inset var(--win-bg);
-  outline:none;
+  background:#fff;
+  color:#000;
 }
 
-/* ================= BUTTONS ================= */
+/* ---------------- BUTTON (WIN98 STYLE) ---------------- */
 
 button{
+  margin-top:8px;
   padding:6px 10px;
-  margin-top:5px;
 
-  font-family:Tahoma;
-  font-size:12px;
+  font-family: Tahoma;
+  font-size:13px;
 
-  background: var(--win-bg);
+  background: var(--win-panel);
 
   border-top:2px solid var(--win-light);
   border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
 
   cursor:pointer;
 }
 
 button:active{
-  border-top:2px solid var(--win-darker);
-  border-left:2px solid var(--win-darker);
+  border-top:2px solid var(--win-dark);
+  border-left:2px solid var(--win-dark);
   border-right:2px solid var(--win-light);
   border-bottom:2px solid var(--win-light);
 }
 
-/* ================= TRACK ================= */
+/* ---------------- TRACK WINDOW ---------------- */
 
 .track{
-  width:90%;
-  max-width:600px;
-  margin:10px auto;
+  width:600px;
+  max-width:90%;
+  margin:15px auto;
   padding:10px;
 
-  background: var(--win-bg);
+  background: var(--win-panel);
 
   border-top:2px solid var(--win-light);
   border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
+
+  position:relative;
 }
 
-/* ================= TOP BAR ================= */
+/* XP title strip (still classic, not neon) */
+.track::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:22px;
+  background: linear-gradient(90deg, #0a246a, #3a6ea5);
+}
+
+/* ---------------- TOP BAR ---------------- */
 
 .top{
   display:flex;
   justify-content:space-between;
-  font-size:12px;
+  align-items:center;
+  margin-top:18px;
 }
 
 .nick{
   font-weight:bold;
 }
 
-/* ================= LIKE BUTTON ================= */
+/* ---------------- LIKE BUTTON ---------------- */
 
 .like{
   font-size:12px;
-  padding:3px 6px;
+  padding:2px 6px;
 
-  background: var(--win-bg);
+  background:#d4d0c8;
 
   border-top:2px solid var(--win-light);
   border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
 
   cursor:pointer;
 }
 
-/* ================= DELETE (KOSZ) ================= */
+.like:active{
+  border-top:2px inset var(--win-dark);
+}
+
+/* ---------------- DELETE ICON ---------------- */
 
 .delete{
-  float:right;
-  width:18px;
-  height:18px;
+  position:absolute;
+  top:2px;
+  right:4px;
 
-  font-size:12px;
-  line-height:16px;
-  text-align:center;
-
-  background: var(--win-bg);
-
-  border-top:2px solid var(--win-light);
-  border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
-
+  font-size:14px;
   cursor:pointer;
 }
 
-.delete:active{
-  border-top:2px solid var(--win-darker);
-  border-left:2px solid var(--win-darker);
-  border-right:2px solid var(--win-light);
-  border-bottom:2px solid var(--win-light);
-}
-
-/* ================= LINKS ================= */
+/* ---------------- LINKS ---------------- */
 
 a{
+  display:inline-block;
+  margin-top:6px;
   font-size:12px;
-  color:var(--win-blue);
+  color: var(--win-blue);
   text-decoration:underline;
 }
 
-/* ================= IFRAME ================= */
+/* ---------------- IFRAME ---------------- */
 
 iframe{
   width:100%;
-  height:180px;
+  height:160px;
   margin-top:8px;
 
   border:2px inset var(--win-bg);
+  background:#000;
 }
 
-/* ================= COMMENTS ================= */
+/* ---------------- COMMENTS ---------------- */
 
 .comments{
-  margin-top:8px;
+  margin-top:10px;
   padding:6px;
 
   font-size:12px;
 
-  background:white;
+  background:#ffffff;
+
   border:2px inset var(--win-bg);
 
-  max-height:100px;
+  max-height:120px;
   overflow:auto;
 }
 
-/* ================= COMMENT INPUT ================= */
+/* ---------------- COMMENT INPUT ---------------- */
 
 .commentBox{
   width:100%;
-  margin-top:5px;
-  padding:5px;
-
-  font-size:12px;
+  margin-top:6px;
+  padding:6px;
 
   border:2px inset var(--win-bg);
+  font-family:Tahoma;
 }
 
-/* ================= SMALL BUTTON ================= */
+/* ---------------- TAGS ---------------- */
 
-.smallBtn{
+.tags{
+  margin-top:6px;
+}
+
+.tag{
+  display:inline-block;
+  margin-right:4px;
+  padding:1px 5px;
+
   font-size:11px;
-  padding:4px 8px;
 
-  background: var(--win-bg);
+  background:#e0e0e0;
 
   border-top:2px solid var(--win-light);
   border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-darker);
-  border-bottom:2px solid var(--win-darker);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
 
   cursor:pointer;
 }
 
-/* ================= MOBILE (keeps XP look) ================= */
+/* ---------------- SMALL BUTTON ---------------- */
+
+.smallBtn{
+  margin-top:6px;
+  font-size:11px;
+  padding:4px 8px;
+
+  background: var(--win-panel);
+
+  border-top:2px solid var(--win-light);
+  border-left:2px solid var(--win-light);
+  border-right:2px solid var(--win-dark);
+  border-bottom:2px solid var(--win-dark);
+
+  cursor:pointer;
+}
+
+/* ---------------- MOBILE ---------------- */
 
 @media (max-width:600px){
-  header h1{font-size:16px;}
-  .track,.panel{width:95%;}
+  .panel, .track{
+    width:95%;
+  }
+
+  iframe{
+    height:120px;
+  }
 }
