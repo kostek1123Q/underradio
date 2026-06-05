@@ -234,54 +234,53 @@ iframe{
   font-family:Tahoma;
 }
 
-/* ---------------- TAGS ---------------- */
+/* ===== FIX INPUT OVERFLOW ===== */
+
+input{
+  width:100%;
+  max-width:100%;
+}
+
+.panel{
+  width:calc(100% - 20px);
+}
+
+/* ===== TAGS ===== */
 
 .tags{
-  margin-top:6px;
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
 }
 
-.tag{
-  display:inline-block;
-  margin-right:4px;
-  padding:1px 5px;
-
-  font-size:11px;
-
-  background:#e0e0e0;
-
-  border-top:2px solid var(--win-light);
-  border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-dark);
-  border-bottom:2px solid var(--win-dark);
-
-  cursor:pointer;
-}
-
-/* ---------------- SMALL BUTTON ---------------- */
-
-.smallBtn{
-  margin-top:6px;
-  font-size:11px;
+.tags span{
+  font-size:12px;
   padding:4px 8px;
-
-  background: var(--win-panel);
-
-  border-top:2px solid var(--win-light);
-  border-left:2px solid var(--win-light);
-  border-right:2px solid var(--win-dark);
-  border-bottom:2px solid var(--win-dark);
-
+  border:1px solid var(--xp-green);
+  border-radius:8px;
   cursor:pointer;
+  color:var(--xp-green);
+  background:#05070c;
 }
 
-/* ---------------- MOBILE ---------------- */
+.tags span:hover{
+  background:var(--xp-green);
+  color:#000;
+}
 
-@media (max-width:600px){
-  .panel, .track{
-    width:95%;
-  }
+/* ===== MOBILE FIX ===== */
 
-  iframe{
-    height:120px;
-  }
+body, html{
+  overflow-x:hidden;
+}
+
+.track, .panel{
+  max-width:100%;
+}
+
+/* ===== comments overflow fix ===== */
+
+.comments{
+  word-break:break-word;
 }
