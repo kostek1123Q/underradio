@@ -14,23 +14,37 @@
 <div class="bg"></div>
 
 <header>
-<h1>UNDERRADIO</h1>
-<p>Najświeższe i najbardziej niszowe underowe tracki w polsce</p>
+  <h1>UNDERRADIO</h1>
+  <p>Najświeższe i najbardziej niszowe underowe tracki w Polsce</p>
+
+  <!-- UX: compact toggle -->
+  <button onclick="document.body.classList.toggle('compact')" class="smallBtn">
+    toggle compact mode
+  </button>
 </header>
 
 <section class="panel">
 
-<input id="nick" placeholder="twój nick">
-<input id="url" placeholder="spotify / soundcloud / youtube link">
+  <input id="nick" placeholder="twój nick">
+  <input id="url" placeholder="spotify / soundcloud / youtube link">
 
-<button onclick="addTrack()">DODAJ</button>
+  <!-- NEW: optional hashtags -->
+  <input id="tags" placeholder="#trap #drill #y2k (opcjonalne)">
+
+  <button onclick="addTrack()">DODAJ</button>
 
 </section>
 
 <section class="list">
 
-<h2>TRACKI</h2>
-<div id="tracks"></div>
+  <h2>TRACKI</h2>
+
+  <!-- UX: tag filter reset -->
+  <button class="smallBtn" onclick="location.reload()">
+    reset filtrów
+  </button>
+
+  <div id="tracks"></div>
 
 </section>
 
