@@ -1,46 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&family=Press+Start+2P&display=swap');
 
 :root{
-  --bg:#050006;
-  --panel:#0d0012;
-  --pink:#ff2ea6;
-  --pink2:#ff66cc;
-  --neon:#ff00cc;
-  --text:#f5e9ff;
-  --muted:#b98bbf;
-  --border:#2a0b2f;
+  --xp-blue:#2b579a;
+  --xp-blue2:#1e3f66;
+  --xp-sky:#4fc3ff;
+  --xp-pink:#ff4fd8;
+  --xp-purple:#7a5cff;
+  --xp-bg:#cfe7ff;
+  --xp-panel:#e8f2ff;
+  --text:#10233f;
+  --muted:#3d5a7a;
+  --border:#7fb2ff;
 }
 
 /* ---------------- BASE ---------------- */
 
 body{
   margin:0;
-  font-family:'Space Grotesk', sans-serif;
-  background:var(--bg);
+  font-family:Tahoma, sans-serif;
+  background: linear-gradient(180deg, var(--xp-bg), #ffffff);
   color:var(--text);
   overflow-x:hidden;
 }
 
-/* grain / old web noise */
+/* XP soft glow background */
 body::before{
   content:"";
   position:fixed;
   inset:0;
-  background-image:url("https://grainy-gradients.vercel.app/noise.svg");
-  opacity:0.08;
-  pointer-events:none;
-  mix-blend-mode:screen;
-}
-
-.bg{
-  position:fixed;
-  inset:0;
-  z-index:-1;
   background:
-    radial-gradient(circle at 20% 20%, #ff00cc33, transparent 40%),
-    radial-gradient(circle at 80% 40%, #ff2ea633, transparent 45%),
-    radial-gradient(circle at 50% 90%, #7a00ff22, transparent 50%);
-  filter: blur(90px);
+    radial-gradient(circle at 10% 20%, #4fc3ff55, transparent 40%),
+    radial-gradient(circle at 80% 30%, #ff4fd855, transparent 45%),
+    radial-gradient(circle at 40% 90%, #7a5cff33, transparent 50%);
+  pointer-events:none;
 }
 
 /* ---------------- HEADER ---------------- */
@@ -48,23 +40,20 @@ body::before{
 header{
   text-align:center;
   padding:50px 20px 20px;
+  background: linear-gradient(180deg, #ffffffaa, transparent);
+  border-bottom:2px solid var(--border);
 }
 
 header h1{
   font-family:'Press Start 2P', monospace;
-  font-size:2rem;
-  letter-spacing:2px;
-
-  color:var(--pink);
-
-  text-shadow:
-    0 0 5px var(--pink),
-    0 0 15px var(--neon),
-    0 0 30px #ff00cc55;
+  font-size:1.6rem;
+  color:var(--xp-blue);
+  text-shadow:1px 1px 0 white, 0 0 10px var(--xp-sky);
+  letter-spacing:1px;
 }
 
 header p{
-  margin-top:12px;
+  margin-top:10px;
   color:var(--muted);
   font-size:14px;
 }
@@ -78,41 +67,53 @@ header p{
   flex-direction:column;
   gap:10px;
   padding:20px;
+
+  background: linear-gradient(180deg, var(--xp-panel), #dff0ff);
+  border:2px solid var(--border);
+  border-radius:16px;
+
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    0 10px 30px rgba(0,0,0,0.1);
 }
 
 input{
-  padding:14px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#0a0010;
+  padding:12px;
+  border-radius:8px;
+  border:2px solid var(--border);
+  background:white;
   color:var(--text);
   outline:none;
-
-  box-shadow: inset 0 0 10px #000;
 }
 
 input:focus{
-  border-color:var(--pink);
-  box-shadow:0 0 15px #ff00cc55;
+  border-color:var(--xp-sky);
+  box-shadow:0 0 8px var(--xp-sky);
 }
 
 button{
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
 
-  background:linear-gradient(90deg,var(--pink),var(--neon));
+  background: linear-gradient(180deg, var(--xp-sky), var(--xp-blue));
   color:white;
   font-weight:700;
   cursor:pointer;
 
-  box-shadow:0 0 20px #ff00cc55;
-  transition:0.2s;
+  box-shadow:
+    inset 0 1px 0 #ffffffaa,
+    0 4px 0 #1b3a66;
+  transition:0.15s;
 }
 
 button:hover{
   transform:translateY(-1px);
-  box-shadow:0 0 30px #ff00cc88;
+}
+
+button:active{
+  transform:translateY(2px);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
 }
 
 /* ---------------- TRACK CARD ---------------- */
@@ -122,27 +123,25 @@ button:hover{
   margin:15px auto;
   padding:18px;
 
-  background:linear-gradient(180deg,#0b0010,#07000b);
-  border:1px solid var(--border);
-  border-radius:16px;
+  background: linear-gradient(180deg, #ffffff, #d8ecff);
+  border:2px solid var(--border);
+  border-radius:14px;
 
   box-shadow:
-    0 0 20px #000,
-    inset 0 0 10px #000;
+    inset 0 0 0 1px #fff,
+    0 8px 20px rgba(0,0,0,0.12);
   position:relative;
-  overflow:hidden;
 }
 
-/* chrome glow line */
+/* XP top shine bar */
 .track::before{
   content:"";
   position:absolute;
   top:0;
   left:0;
   width:100%;
-  height:2px;
-  background:linear-gradient(90deg,transparent,var(--pink),var(--neon),transparent);
-  opacity:0.8;
+  height:3px;
+  background: linear-gradient(90deg, var(--xp-sky), var(--xp-purple), var(--xp-pink));
 }
 
 /* ---------------- TOP BAR ---------------- */
@@ -155,45 +154,42 @@ button:hover{
 
 .nick{
   font-weight:700;
-  color:var(--pink);
-  text-shadow:0 0 8px #ff00cc55;
+  color:var(--xp-blue);
 }
 
 .like{
   cursor:pointer;
-  background:#140018;
-  border:1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff, #cfe7ff);
+  border:2px solid var(--border);
   padding:6px 10px;
   border-radius:10px;
-
-  color:var(--pink2);
-  transition:0.2s;
+  color:var(--xp-blue);
+  font-weight:700;
 }
 
 .like:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 12px #ff00cc55;
+  background: linear-gradient(180deg, #eaf6ff, #bfe2ff);
 }
 
 /* ---------------- LINKS + EMBED ---------------- */
 
 a{
-  color:var(--pink2);
-  text-decoration:none;
+  color:var(--xp-purple);
+  text-decoration:underline;
   display:inline-block;
   margin-top:8px;
 }
 
 a:hover{
-  text-shadow:0 0 10px #ff00cc;
+  color:var(--xp-pink);
 }
 
 iframe{
   width:100%;
   margin-top:10px;
-  border-radius:12px;
+  border-radius:10px;
   height:200px;
-  border:1px solid var(--border);
+  border:2px solid var(--border);
 }
 
 /* ---------------- COMMENTS ---------------- */
@@ -201,22 +197,25 @@ iframe{
 .comments{
   margin-top:10px;
   font-size:13px;
-  color:#d9b3e6;
+  color:var(--muted);
   max-height:120px;
   overflow:auto;
-  padding-right:6px;
+  padding:8px;
+
+  background:#f6fbff;
+  border:1px solid #b7d7ff;
+  border-radius:10px;
 }
 
-/* scrollbar Y2K style */
 .comments::-webkit-scrollbar{
   width:6px;
 }
 .comments::-webkit-scrollbar-thumb{
-  background:var(--pink);
+  background:var(--xp-blue);
   border-radius:10px;
 }
 
-/* ---------------- INPUT COMMENT ---------------- */
+/* ---------------- COMMENT INPUT ---------------- */
 
 .commentBox{
   width:100%;
@@ -224,8 +223,8 @@ iframe{
   padding:10px;
 
   border-radius:10px;
-  background:#0a0010;
-  border:1px solid var(--border);
+  background:white;
+  border:2px solid var(--border);
   color:var(--text);
 }
 
@@ -234,17 +233,18 @@ iframe{
   padding:8px 12px;
 
   border-radius:10px;
-  background:linear-gradient(90deg,#ff2ea6,#7a00ff);
+  background: linear-gradient(180deg, var(--xp-pink), var(--xp-purple));
   border:none;
   color:white;
+  font-weight:700;
   cursor:pointer;
 }
 
-/* ---------------- MOBILE MODE ---------------- */
+/* ---------------- MOBILE ---------------- */
 
 @media (max-width:600px){
   header h1{
-    font-size:1.4rem;
+    font-size:1.1rem;
   }
 
   .track{
