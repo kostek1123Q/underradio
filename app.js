@@ -2,11 +2,52 @@ const API = "https://underradio-backend.onrender.com";
 
 let tracks = [];
 
+/* ---------------- SMART KEEP-ALIVE ---------------- */
+
+let lastPing = 0;
+let failCount = 0;
+
+async function smartKeepAlive() {
+  const now = Date.now();
+
+  // 1 request / 60s max
+  if (now - lastPing < 60000) return;
+
+  // only when tab active
+  if (document.hidden) return;
+
+  lastPing = now;
+
+  try {
+    await fetch(`${API}/test`);
+    failCount = 0;
+    console.log("🟢 keep-alive OK");
+
+  } catch (e) {
+    failCount++;
+    console.log("🔴 keep-alive FAIL:", failCount);
+
+    // backoff (max 5 min)
+    lastPing = Date.now() + Math.min(60000 * failCount, 300000);
+  }
+}
+
+smartKeepAlive();
+setInterval(smartKeepAlive, 15000);
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) smartKeepAlive();
+});
+
+/* ---------------- LOAD TRACKS ---------------- */
+
 async function loadTracks(){
   const res = await fetch(`${API}/tracks`);
   tracks = await res.json();
   render();
 }
+
+/* ---------------- EMBED ---------------- */
 
 function embed(url){
   if(!url) return "";
@@ -33,7 +74,7 @@ function embed(url){
   return "";
 }
 
-/* ---------------- COMMENTS FIX ---------------- */
+/* ---------------- COMMENTS ---------------- */
 
 async function loadComments(id){
   const res = await fetch(`${API}/tracks/${id}/comments`);
@@ -51,6 +92,9 @@ async function addTrack(){
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ nickname:nick, track_url:url })
   });
+
+  document.getElementById("nick").value = "";
+  document.getElementById("url").value = "";
 
   loadTracks();
 }
